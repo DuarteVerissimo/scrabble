@@ -138,28 +138,33 @@ def testa_palavra_padrao(palavra, padrao, conj):
         bool: True se for possível formar a palavra substituindo os '.' por letras do conjunto,
               Caso contrário, False
     """
+    resultado = testa_palavra_padrao_auxiliar(palavra, padrao, conj)
+    return len(resultado) > 0
+
+
+def testa_palavra_padrao_auxiliar(palavra, padrao, conj):
     if len(palavra) != len(padrao):
-        return False
+        return []
     
     ocorrencias = conj.copy()
- 
+    letras_usadas = []
     for i in range(len(palavra)):
         letra_palavra = palavra[i]
         letra_padrao = padrao[i]
         
         if letra_padrao == '.': 
 
-            # Se o conjunto de letras não incluir a letra da palavra ou se o contador da mesma for 0
+            # Verificar se a letra está no cojunto e se existem suficientes para usar
             if letra_palavra not in ocorrencias or ocorrencias[letra_palavra] == 0:
-                return False
+                return []
             
             ocorrencias[letra_palavra] -= 1
-        
+            letras_usadas.append(palavra[i])
         else:
             if letra_palavra != letra_padrao:
-                return False
+                return []
     
-    return True
+    return letras_usadas
 
 
 
@@ -505,3 +510,105 @@ def distribui_letra(letras,jogador):
         jogador['letras'][letra] = 1
 
     return True
+
+
+
+def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
+    letras_usadas = ()
+    linha, coluna = casa
+
+    if direcao == 'H' and len(palavra) + coluna - 1 > 15:
+        raise ValueError("...")
+    
+    if direcao == 'V' and len(palavra) + linha - 1 > 15:
+        raise ValueError("...")
+    
+    if primeira and (linha != 8 or coluna != 8):
+        return ()
+
+    padrao = obtem_sequencia(tab, casa, direcao, len(palavra))
+    letras_usadas = []
+
+    if not primeira:
+        toca_letra = False
+        for i in range(len(palavra)):
+            
+            if palavra[i] == padrao[i]:
+                toca_letra = True
+                break
+
+        if not toca_letra:
+            return ()
+
+    
+    if testa_palavra_padrao(palavra, padrao, conj_letras):
+        insere_palavra(tab, casa, direcao, palavra)
+        
+        letras_usadas = testa_palavra_padrao_auxiliar(palavra, padrao, conj_letras)
+        letras_usadas = sorted(letras_usadas, key= lambda x: ABECEDARIO.index(x))
+                
+        return tuple(letras_usadas)
+    
+    else:
+        return ()
+    
+
+
+def processa_jogada(tab ,jog ,pilha ,pontos ,primeira):
+    while True:
+        jogada = input("Jogada J" + str(jog['id']) + ": ")
+        jogada_recebida = jogada.split()
+        
+        if jogada_recebida[0] == 'P':
+            return False
+
+        elif jogada_recebida[0] == 'T':
+            if processa_troca(...):
+                return True
+            #converter a sequencia numa lista(.split())
+            #validar input(se jogador tem as letras)
+            
+            #tirar do conjunto de letras as letras da sequencia
+            #adiciona da lista de letras as ultimas
+            #isto se estiverem pelo menos 7 letras no saco
+            #se for valida retorna true
+
+            #fazer funcoes auxiliares que
+        
+        elif jogada_recebida[0] == 'J':
+            if jogada_jogar(...):
+                return True
+
+def processa_troca(jogada, conj_letra....):
+    #...
+    return FALSE
+    # ...
+    return TRUE
+
+def jogada_jogar(jogada):
+   #...
+    return FALSE
+    # ...
+    return TRUE
+
+
+conj1 = cria_conjunto(('A','U','O','T','X','F'),(2,1,1,1,1,1))
+jog1=cria_jogador(2, 0, conj1)
+tab = cria_tabuleiro()
+pilha = ['S', 'B', 'P', 'E', 'C', 'E', 'E', 'S', 'J', 'D', 'I']
+# print(processa_jogada(tab, jog1, pilha, pontos, True))
+print(jogada_troca(jog, pilha))
+print(jog) # ver se 
+print(pilha)
+    
+        
+
+
+
+
+
+
+def scrable():
+    # baralha letras
+    # distribui letras por jogadores
+    # ... (Duarte continua!)
