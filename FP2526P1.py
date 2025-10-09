@@ -10,18 +10,17 @@ pontos = {
     'S': 1, 'T': 1, 'U': 1, 'V': 4, 'X': 8, 'Z': 8}
 
 
-
 def cria_conjunto(let, occ):
     """
-    Função que cria um cojunto de letras representadas num dicionário com o seu
-    número de ocorrências
+    Função que cria um cojunto de letras representadas num dicionário onde as chaves são letras 
+    e os valores o número de ocorrências de cada letra
 
     Args:
-        let (tuplo): letras(strings de 1 caractere)
-        occ (tuplo): tuplo de inteiros positivos, cada um representando 
-                     o número de ocorrências da letra correspondente em "let"
+        let (tuppl): letras(strings de 1 caractere)
+        occ (tupple): tuplo de inteiros positivos, cada um representando o número de ocorrências da 
+                     letra correspondente em "let"
 
-    Return:
+    Returns:
         dict: dicionário {letra: ocorrências}, representando o conjunto de letras
     
     Raises:
@@ -63,7 +62,6 @@ def cria_conjunto(let, occ):
     return d
 
 
-
 def gera_numero_aleatorio(estado):
     """
     Função que gera um número pseudo-aleatório usando o algoritmo xorshift
@@ -71,7 +69,7 @@ def gera_numero_aleatorio(estado):
     Args:
         estado (int): estado atual do gerador
 
-    Return:
+    Returns:
         int: número pseudo-aleatório(novo estado do gerador)
     
     Raises:
@@ -88,7 +86,6 @@ def gera_numero_aleatorio(estado):
     return estado   
 
 
-
 def permuta_letras(letras, estado):
     """
     Função que altera a ordem das letras na lista, destrutivamente usando
@@ -98,15 +95,14 @@ def permuta_letras(letras, estado):
         letras (list): lista de letras (strings de 1 caractere)
         estado (int): estado inicial do gerador de numeros aleatórios
 
-    Return:
+    Returns:
         não retorna nada, alterando destrutivamente o argumento letras
     """
     n = len(letras)
     for i in range(n - 1, 0, -1):
-        estado = gera_numero_aleatorio(estado)              # Obtém números pseudo-aleatórios chamando gera_numero_aleatorio
-        j = estado % (i + 1)                                # Usa o resto da divisão (%) para garantir que 0 < j < i 
+        estado = gera_numero_aleatorio(estado)          # Obtém números pseudo-aleatórios chamando gera_numero_aleatorio
+        j = estado % (i + 1)                            # Usa o resto da divisão (%) para garantir que 0 < j < i 
         letras[i], letras[j] = letras[j], letras[i]
-
 
 
 def baralha_conjunto(conj, estado):
@@ -117,18 +113,19 @@ def baralha_conjunto(conj, estado):
         conj (dict): dicionário no formato {letra: ocorrências}
         estado (int): inteiro positivo
     
-    Return:
+    Returns:
         list: lista de letras baralhada, contendo todas as letras e as ocorrências delas
     """
     lista_letras = []
+    
+    # Ordenar pela ordem alfabética
     for letra in ABECEDARIO:
         if letra in conj:
             lista_letras.extend([letra] * conj[letra])
     
-    permuta_letras(lista_letras, estado)
+    permuta_letras(lista_letras, estado)    # Baralha destrutivamente a lista
     
     return lista_letras
-
 
 
 def testa_palavra_padrao(palavra, padrao, conj):
@@ -141,7 +138,7 @@ def testa_palavra_padrao(palavra, padrao, conj):
         padrao (str): string do mesmo comprimento que a palavra, composta por letras e '.'
         conj (dict): dicionário de letras de formato {letra: ocorrências}
 
-    Return:
+    Returns:
         bool: True se for possível formar a palavra substituindo os '.' por letras do conjunto,
               Caso contrário, False
     """
@@ -160,21 +157,21 @@ def testa_palavra_padrao_auxiliar(palavra, padrao, conj):
         padrao (str): string do mesmo comprimento que a palavra, composta por letras e '.'
         conj (dict): dicionário de letras de formato {letra: ocorrências}
 
-    Return:
+    Returns:
         list: lista vazia caso não dê para substituir a palavra no padrão ou então devolve uma lista 
               que contém as letras substituidas no padrão
     """
     if len(palavra) != len(padrao):
         return []
     
-    ocorrencias = conj.copy()
+    ocorrencias = conj.copy()       # Copia para não alterar o conjunto original
     letras_usadas = []
+    
     for i in range(len(palavra)):
         letra_palavra = palavra[i]
         letra_padrao = padrao[i]
         
         if letra_padrao == '.': 
-
             # Verificar se a letra está no cojunto e se existem occorrencias suficientes para usar
             if letra_palavra not in ocorrencias or ocorrencias[letra_palavra] == 0:
                 return []
@@ -182,11 +179,11 @@ def testa_palavra_padrao_auxiliar(palavra, padrao, conj):
             ocorrencias[letra_palavra] -= 1
             letras_usadas.append(palavra[i])
         else:
+            # Se o padrão tiver uma letra têm de coincidir com a letra da palavra
             if letra_palavra != letra_padrao:
                 return []
     
     return letras_usadas
-
 
 
 def cria_tabuleiro():
@@ -196,7 +193,7 @@ def cria_tabuleiro():
     Args:
         Nenhum
 
-    Return:
+    Returns:
         list: lista de 15 listas, cada uma com 15 elementos
               onde cada casa livre é rrepresentada por "."
     """
@@ -209,7 +206,6 @@ def cria_tabuleiro():
     return tab
 
 
-
 def cria_casa(l, c):
     """
     Função que cria uma casa do tabuleiro e representa a num tuplo(linha, coluna)
@@ -218,7 +214,7 @@ def cria_casa(l, c):
         l (int): linha do tabuleiro (1 a 15)
         c (int): coluna do tabuleiro (1 a 15)
 
-    Return:
+    Returns:
         tuplo: (l, c) representando a casa
 
     Raise:
@@ -231,7 +227,6 @@ def cria_casa(l, c):
     return (l, c)
 
 
-
 def obtem_valor(tab, casa):
     """
     Função que mostra o valor que está numa casa do tabuleiro
@@ -240,13 +235,12 @@ def obtem_valor(tab, casa):
         tab (list): tabuleiro 15x15
         casa (tuple): (linha, coluna), entre 1 e 15
 
-    Return:
+    Returns:
         str: letra ou '.'
     """
     linha, coluna = casa
     
-    return tab[linha - 1][coluna - 1]
-
+    return tab[linha - 1][coluna - 1]           # Ajusta aos índices do python
 
 
 def insere_letra(tab, casa, letra):
@@ -258,7 +252,7 @@ def insere_letra(tab, casa, letra):
         casa (tuple): (linha, coluna), entre 1 e 15
         letra (str): letra a inserir
 
-    Return:
+    Returns:
         list: tabuleiro modificado
     """
     linha, coluna = casa    
@@ -267,10 +261,9 @@ def insere_letra(tab, casa, letra):
     return tab
 
 
-
 def obtem_sequencia(tab, casa, direcao, tamanho):
     """
-    Função que obtém uma dada sequência no tabuleiro
+    Função que obtém uma dada sequência no tabuleiro a partir de uma casa e direção
 
     Args:
         tab (list): tabuleiro 15x15
@@ -278,16 +271,14 @@ def obtem_sequencia(tab, casa, direcao, tamanho):
         direcao (str): 'H' para horizontal ou 'V' para vertical
         tamanho (int): número de casas a ler
 
-    Return:
+    Returns:
         str: sequência de caracteres do tabuleiro
 
     Raise:
         ValueError: se a o tamanho da sequencia passar as bordas do tabuleiro
                     se a direção for diferente de 'H' ou 'V'
     """
-    l, c = casa
-    linha = l 
-    coluna = c 
+    linha, coluna = casa
  
     inc_linha = 0
     inc_coluna = 0
@@ -301,14 +292,11 @@ def obtem_sequencia(tab, casa, direcao, tamanho):
     
     sequencia = ""
     for i in range(tamanho):
-        
-        # Dependenda da direção o incremento das linhas ou das colunas pode ser 0 ou 1*i
+        # Incrementa linha ou coluna conforme a direção escolhida
         nova_casa = cria_casa(linha + (inc_linha * i), coluna + (inc_coluna * i))
-
         sequencia += obtem_valor(tab, nova_casa)
 
     return sequencia
-
 
 
 def insere_palavra(tab, casa, direcao, palavra):
@@ -322,7 +310,7 @@ def insere_palavra(tab, casa, direcao, palavra):
         direcao (str): 'H' para horizontal ou 'V' para vertical
         palavra (str): palavra a inserir
 
-    Return:
+    Returns:
         list: tabuleiro modificado
 
     Raise:
@@ -339,19 +327,17 @@ def insere_palavra(tab, casa, direcao, palavra):
 
     inc_linha = 0
     inc_coluna = 0
+    
     if direcao == 'H':
         inc_coluna = 1
-    
     elif direcao == 'V':
         inc_linha = 1
     
     for i in range(len(palavra)):
         nova_casa = cria_casa(linha + inc_linha * i, coluna + inc_coluna * i)
-        
         tab = insere_letra(tab, nova_casa, palavra[i])
     
     return tab
-
 
 
 def tabuleiro_para_str(tab):
@@ -361,18 +347,22 @@ def tabuleiro_para_str(tab):
     Args:
         tab (list): tabuleiro 15x15
 
-    Return:
+    Returns:
         str: representação textual do tabuleiro
     """
     tabuleiro = []
     
+    # Numeração das colunas
     numeros_das_colunas1="                       1 1 1 1 1 1"
     numeros_das_colunas2="     1 2 3 4 5 6 7 8 9 0 1 2 3 4 5"
     
     tabuleiro.append(numeros_das_colunas1)
     tabuleiro.append(numeros_das_colunas2)
-    tabuleiro.append("   +" + "-" * 31 + "+")               # Linha superior da moldura
+    
+    # Linha superior da moldura
+    tabuleiro.append("   +" + "-" * 31 + "+")
 
+    # Cada linha do tabuleiro é constitiuda pelo número da linha e o conteúdo das células
     for i in range(15):
         if i + 1 < 10:
             numeros_das_linhas = ' ' + str(i + 1)
@@ -383,20 +373,20 @@ def tabuleiro_para_str(tab):
         linha = numeros_das_linhas + " |"
         
         for j in range(15):
-            linha += " " + tab[i][j]                        # Acrescenta o tabuleiro recebido
+            linha += " " + tab[i][j]
         
         linha+=" |"
         
         tabuleiro.append(linha)
     
-    tabuleiro.append("   +" + "-" * 31 + "+")               # Linha inferior da moldura
+    # Linha inferior da moldura
+    tabuleiro.append("   +" + "-" * 31 + "+")
 
+    # Junta todas as linhas numa única string separada por quebras de linha
     resultado=""
-    for k in range(len(tabuleiro)):
-        
+    for k in range(len(tabuleiro)): 
         if k < (len(tabuleiro) -1):
             resultado += tabuleiro[k] + "\n"
-        
         else:
             resultado += tabuleiro[k]
     
@@ -413,8 +403,8 @@ def cria_jogador(ordem, pontos, conj_letras):
         pontos (int): pontos iniciais
         conj_letras (dict): conjunto de letras do jogador
 
-    Return:
-        dict: jogador no formato {'id': ordem, 'pontos': pontos, 'letras': conj_letras}
+    Returns:
+        dict: dicionário do jogador no formato {'id': ordem, 'pontos': pontos, 'letras': conj_letras}
     
     Raise:
         ValueError: se a ordem não for 1,2,3 ou 4
@@ -440,7 +430,6 @@ def cria_jogador(ordem, pontos, conj_letras):
         
         if letra not in ABECEDARIO:
             raise ValueError("cria_jogador: argumentos inválidos")
-        
         if not type(occ) == int or occ <= 0:
             raise ValueError("cria_jogador: argumentos inválidos")
         total += occ
@@ -448,6 +437,7 @@ def cria_jogador(ordem, pontos, conj_letras):
     if total > 7:
         raise ValueError("cria_jogador: argumentos inválidos")
     
+    # Cria e devolve o dicionário do jogador
     return  {'id': ordem,'pontos': pontos ,'letras': conj_letras}
 
 
@@ -459,13 +449,13 @@ def jogador_para_str(jog):
     Args:
         jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
 
-    Return:
+    Returns:
         str: representação textual do jogador
     """
     letras = jog['letras']
-
     lista = []
     
+    # Cria uma lista com as letras do jogador por ordem alfabética
     for letra in ABECEDARIO:    
         if letra in letras:
             for _ in range(letras[letra]):
@@ -473,16 +463,18 @@ def jogador_para_str(jog):
   
     numero_de_pontos = str(jog['pontos'])
     
+    # Formata a pontuação para ter sempre 3 espaços
     if jog['pontos'] < 10:
             pontos = "  " + numero_de_pontos
-   
     elif jog['pontos'] < 100:
             pontos = " " + numero_de_pontos
-    
     else:
             pontos = numero_de_pontos           
 
+    # Cria o prefixo com o número e a pontuação do jogador
     prefixo = '#'+str(jog['id'])+' ('+pontos+'): '
+    
+    # Junta todas as letras separadas por espaços
     res = prefixo
     for i in range(len(lista)):
         res += lista[i]
@@ -502,17 +494,18 @@ def distribui_letra(letras,jogador):
         letras (list): lista de letras (pilha)
         jogador (dict): jogador {'id', 'pontos', 'letras'}
 
-    Return:
+    Returns:
         bool: True se uma letra foi atribuída, False se a lista estava vazia
     """
-
     if len(letras) == 0:
         return False
     
     letra = letras[-1]
-    
+
+    # Retira a última letra da lista
     del letras[-1]
     
+    # Adiciona a última letra da lista ao conjunto de letras do jogador
     if letra in jogador['letras']:
         jogador['letras'][letra] += 1
     else:
@@ -536,19 +529,14 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
         conj_letras (dict): conjunto de letras do jogador
         primeira (bool): boleano que identifica se é a primeira jogada
 
-    Return:
+    Returns:
         tuplo: tuplo com as letras usadas por ordem alfabética. Caso contrário,
                devolve um tuplo vazio
-
     """
     letras_usadas = ()
-    linha, coluna = casa
-    
-    if direcao == 'H' and coluna + len(palavra) - 1 > 15:
-        raise ValueError("joga_palavra: argumentos inválidos")
-    if direcao == 'V' and linha + len(palavra) - 1 > 15:
-        raise ValueError("joga_palavra: argumentos inválidos")
+    linha, coluna = casa  
 
+    # A primeira jogada tem de passar no centro do tabuleiro
     if primeira:
         for i in range(len(palavra)):
             if direcao == 'H' and (linha, coluna + i) == (8, 8):
@@ -559,24 +547,25 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
             return ()
 
     padrao = obtem_sequencia(tab, casa, direcao, len(palavra))
-    letras_usadas = []
 
+    # se não for a primeira jogada, tem de tocar numa letra já posta no tabuleiro
     if not primeira:
         toca_letra = False
         for i in range(len(palavra)):
-            
             if palavra[i] == padrao[i]:
                 toca_letra = True
                 break
-
         if not toca_letra:
             return ()
 
-    
+    letras_usadas = []
+    # Verificar se a palavra 
     if testa_palavra_padrao(palavra, padrao, conj_letras):
         insere_palavra(tab, casa, direcao, palavra)
         
+        # Verifica se é possível formar a palavra com as letras do conjunto e o padrão
         letras_usadas = testa_palavra_padrao_auxiliar(palavra, padrao, conj_letras)
+        # Ordenar pela ordem alfabética
         letras_usadas = sorted(letras_usadas, key= lambda x: ABECEDARIO.index(x))
                 
         return tuple(letras_usadas)
@@ -600,22 +589,26 @@ def processa_jogada(tab, jog, pilha, pontos, primeira):
         pontos (dict): dicionário com as pontuações de cada letra
         primeira (bool): True se for a primeira jogada do jogo
 
-    Return:
+    Returns:
         bool: True se a jogada for válida, False caso contrário
     """
+    # Até as instruções serem válidas
     while True:
+        # Recebe um input com as instruções do jogador
         jogada = input("Jogada J" + str(jog['id']) + ": ")
         jogada_recebida = jogada.split()
         
+        # Caso o jogador queira passar
         if jogada_recebida[0] == 'P':
             if len(jogada_recebida ) == 1:
                 return False
 
+        # Caso o jogador queira trocar letras
         elif jogada_recebida[0] == 'T':
             if processa_troca(jogada_recebida, jog, pilha):
                 return True
 
-        
+        # Caso o jogador queira jogar uma palavra
         elif jogada_recebida[0] == 'J':
             if jogar(tab, jog, pilha, jogada_recebida, primeira):
                 return True
@@ -632,9 +625,10 @@ def processa_troca(jogada_recebida, jog, pilha):
         jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
         pilha (list): lista de letras disponíveis (saco)
 
-    Return:
+    Returns:
         bool: retorna True caso a jogada seja válida e False caso seja inválida
     """
+    # Extrai as letras que o jogador deseja trocar
     letras_para_troca = jogada_recebida[1:]
     
     for letra in letras_para_troca:
@@ -643,10 +637,12 @@ def processa_troca(jogada_recebida, jog, pilha):
     
     if len(pilha) >= 7:
         for l in letras_para_troca:
+            # Remove as letras que o jogador quer trocar
             jog['letras'][l] -=1
             if jog['letras'][l] == 0:
                 del jog['letras'][l]
             
+            # Distribui novas letras para o jogador
             distribui_letra(pilha, jog)
         return True
 
@@ -666,7 +662,7 @@ def jogar(tab, jog, pilha, jogada_recebida, primeira):
         jogada_recebida (list): lista que contem o input com as informações necessárias
         primeira (bool): bool que identifica se é a primeira jogada
 
-    Return:
+    Returns:
         bool: retorna True caso a jogada seja válida e False caso seja inválida
     """
     if type(jogada_recebida[1]) == '?' and type(jogada_recebida[1]) == '?':
@@ -674,25 +670,29 @@ def jogar(tab, jog, pilha, jogada_recebida, primeira):
     if len(jogada_recebida)<5:
         return False
 
+    # Extrai as informações para jogar
     linha = int(jogada_recebida[1])
     coluna = int(jogada_recebida[2])
     casa = cria_casa(linha, coluna)
     direcao = jogada_recebida[3]
     palavra = jogada_recebida[4]
+    
+    # Joga a palavra no tabueleiro devolvendo uma lista com as letras usadas
     letras_usadas = list(joga_palavra(tab, palavra, casa, direcao, jog['letras'], primeira))
 
     if len(letras_usadas) == 0 :
         return False
     
+    # Atualiza o conjunto de letras do jogador
     for l in letras_usadas:
         jog['letras'][l] -=1
         if jog['letras'][l] == 0:
             del jog['letras'][l]
         
         distribui_letra(pilha, jog)
-    palavra = list(palavra)
 
-    jog['pontos'] += pontuar_lista_de_letras(palavra)
+    # Atualiza a pontuação do jogador
+    jog['pontos'] += pontuar_lista_de_letras(list(palavra))
     
     return True
 
@@ -705,12 +705,12 @@ def pontuar_lista_de_letras(lista_de_letras):
     Args:
         lista_de_letras (list): lista de letras
 
-    Return:
+    Returns:
         int: pontuação total das letras dessa lista
     """
     pontuacao = 0
     for letra in lista_de_letras:
-        pontuacao += pontos[letra]
+        pontuacao += pontos[letra]      # Soma o valor de pontos da letra
     return pontuacao
 
 
@@ -724,7 +724,7 @@ def scrabble(jogadores, saco, pontos, estado):
         pontos (dict): dicionário com as pontuações de cada letra
         estado (int): estado do gera_numeros_aleatorios
 
-    Return:
+    Returns:
         tuplo: devolve um tuplo com as pontuações dos jogadores
 
     Raise:
@@ -751,47 +751,47 @@ def scrabble(jogadores, saco, pontos, estado):
     
     pilha = baralha_conjunto(saco, estado)
     
+    # Distribuir 7 peças por cada jogador, cria os jogadores e cria a lista de jogadores    
     lista_jogadores = []
-    # Distribuir 7 peças por cada jogador
     for i in range(1, jogadores + 1):
             jog=cria_jogador(i, 0, {})
             for _ in range(7):
                 distribui_letra(pilha, jog)
             lista_jogadores.append(jog)
     
-    # Ciclo de jogadas depois da primeiras
+    # Ciclo do jogo
     passagens_seguidas = 0
     jogo_continua = True
     primeira = True
+    
     while jogo_continua:
         for jog in lista_jogadores:
+            # Mostra o tabuleiro e os jogadores
             print(tabuleiro_para_str(tab))
             for j in range(jogadores):
                 print(jogador_para_str(lista_jogadores[j]))
             
+            # Processa a jogada
             res = processa_jogada(tab, jog, pilha, pontos, primeira)
             
+            # Depois da primeira define como False
             if primeira == True:
                 primeira = False
 
+            # Contabiliza as passagens consecutivas
             if res == False:
                 passagens_seguidas += 1
             else:
                 passagens_seguidas = 0
 
+            # Acaba o jogo se todos passarem
             if passagens_seguidas== jogadores:
                 jogo_continua = False
         
+            # Acaba o jogo se o saco não tiver letras e se um jogador ficar sem letras
             if jog['letras'] =={} and pilha == []:
                 jogo_continua = False
                 break
-    
+
+    # Retorna um tuplo com as pontuações finais
     return tuple(jog['pontos'] for jog in lista_jogadores)
-
-
-
-#tab = cria_tabuleiro()
-#pilha = ['S', 'B', 'P', 'E', 'C', 'E', 'E', 'S', 'J', 'D', 'I']
-#conj1 = cria_conjunto(('A','U','O','T','X','F'),(2,1,1,1,1,1))
-#jog1 = cria_jogador(1, 0, conj1)
-#processa_jogada(tab, jog1, pilha, pontos, True)
