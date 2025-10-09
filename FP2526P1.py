@@ -37,6 +37,7 @@ def cria_conjunto(let, occ):
     if len(let) != len(occ):
         raise ValueError("cria_conjunto: argumentos inválidos")
     
+    #letras_vistas = []
     d = {}
     for i in range(len(let)):
         letra = let[i]
@@ -48,7 +49,10 @@ def cria_conjunto(let, occ):
         
         if letra not in ABECEDARIO:
             raise ValueError("cria_conjunto: argumentos inválidos")
-        
+
+        #if letra in letras_vistas:
+            #raise ValueError("cria_conjunto: argumentos inválidos")
+
         if not type(numero) == int or numero <= 0:
             raise ValueError("cria_conjunto: argumentos inválidos")
         
