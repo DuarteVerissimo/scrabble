@@ -669,6 +669,11 @@ def jogar(tab, jog, pilha, jogada_recebida, primeira):
     Return:
         bool: retorna True caso a jogada seja válida e False caso seja inválida
     """
+    if type(jogada_recebida[1]) == '?' and type(jogada_recebida[1]) == '?':
+        return False
+    if len(jogada_recebida)<5:
+        return False
+
     linha = int(jogada_recebida[1])
     coluna = int(jogada_recebida[2])
     casa = cria_casa(linha, coluna)
@@ -782,3 +787,11 @@ def scrabble(jogadores, saco, pontos, estado):
                 break
     
     return tuple(jog['pontos'] for jog in lista_jogadores)
+
+
+
+#tab = cria_tabuleiro()
+#pilha = ['S', 'B', 'P', 'E', 'C', 'E', 'E', 'S', 'J', 'D', 'I']
+#conj1 = cria_conjunto(('A','U','O','T','X','F'),(2,1,1,1,1,1))
+#jog1 = cria_jogador(1, 0, conj1)
+#processa_jogada(tab, jog1, pilha, pontos, True)
