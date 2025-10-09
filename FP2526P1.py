@@ -197,8 +197,8 @@ def cria_tabuleiro():
         Nenhum
 
     Return:
-        lista de 15 listas, cada uma com 15 elementos
-        onde cada casa livre é rrepresentada por "."
+        list: lista de 15 listas, cada uma com 15 elementos
+              onde cada casa livre é rrepresentada por "."
     """
     tab = []
     
@@ -219,7 +219,7 @@ def cria_casa(l, c):
         c (int): coluna do tabuleiro (1 a 15)
 
     Return:
-        um tuplo (l, c) representando a casa
+        tuplo: (l, c) representando a casa
 
     Raise:
         ValueError: se os números recebidos não forem inteiros
@@ -538,7 +538,20 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
     """"
     Função que, se não sair do tabuleiro e respeitar as regras do jogo, forma uma palavra no tabuleiro
     com um conjunto de letras e devolve um tuplo com as letras usadas por ordem alfabética. Caso não 
-    consiga jogar a palavra 
+    consiga jogar a palavra devolve um tuplo vazio
+
+    Args:
+        tab (list): tabuleiro 15x15
+        palavra (str): palavra a inserir        
+        casa (tuple): (linha, coluna), entre 1 e 15
+        direcao (str): 'H' para horizontal ou 'V' para vertical
+        conj_letras (dict): conjunto de letras do jogador
+        primeira (bool): boleano que identifica se é a primeira jogada
+
+    Return:
+        tuplo: tuplo com as letras usadas por ordem alfabética. Caso contrário,
+               devolve um tuplo vazio
+
     """
     letras_usadas = ()
     linha, coluna = casa
@@ -623,8 +636,7 @@ def processa_troca(jogada_recebida, jog, pilha):
             jog['letras'][l] -=1
             if jog['letras'][l] == 0:
                 del jog['letras'][l]
-
-        for _ in range(len(letras_para_troca)):
+            
             distribui_letra(pilha, jog)
         return True
 
@@ -649,8 +661,7 @@ def jogar(tab, jog, pilha, jogada_recebida, primeira):
         jog['letras'][l] -=1
         if jog['letras'][l] == 0:
             del jog['letras'][l]
-    
-    for _ in range(len(letras_usadas)): 
+        
         distribui_letra(pilha, jog)
     
     jog['pontos'] += pontuar_lista_de_letras(letras_usadas)
