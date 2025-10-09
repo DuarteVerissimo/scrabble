@@ -29,6 +29,7 @@ def cria_conjunto(let, occ):
                     se os tuplos recebidos tiverem comprimentos diferentes
                     se as letras não forem strings de 1 caractere
                     se a letra não estiver no abecedário português
+                    se alguma das letras do tuplo 'let' é repetida
                     se o número de occorências de uma letra não for inteiro maior que 0
     """
     if not isinstance(let, tuple) or not isinstance(occ, tuple):
@@ -37,12 +38,12 @@ def cria_conjunto(let, occ):
     if len(let) != len(occ):
         raise ValueError("cria_conjunto: argumentos inválidos")
     
-    #letras_vistas = []
+    letras_vistas = []
     d = {}
     for i in range(len(let)):
         letra = let[i]
         numero = occ[i]
-        
+
         if not isinstance(letra, str) or len(letra) != 1:
             raise ValueError("cria_conjunto: argumentos inválidos")
         letra = letra.upper()
@@ -50,9 +51,10 @@ def cria_conjunto(let, occ):
         if letra not in ABECEDARIO:
             raise ValueError("cria_conjunto: argumentos inválidos")
 
-        #if letra in letras_vistas:
-            #raise ValueError("cria_conjunto: argumentos inválidos")
-
+        if letra in letras_vistas:
+            raise ValueError("cria_conjunto: argumentos inválidos")
+        letras_vistas += letra
+        
         if not type(numero) == int or numero <= 0:
             raise ValueError("cria_conjunto: argumentos inválidos")
         
@@ -121,7 +123,8 @@ def baralha_conjunto(conj, estado):
     lista_letras = []
     for letra in conj:
         lista_letras.extend([letra] * conj[letra])
-
+    
+    lista_letras = sorted(lista_letras, key= lambda x: ABECEDARIO.index(x))
     permuta_letras(lista_letras, estado)
     
     return lista_letras
@@ -130,8 +133,8 @@ def baralha_conjunto(conj, estado):
 
 def testa_palavra_padrao(palavra, padrao, conj):
     """
-    Função que verifica se é possível formar uma palavra substituindo os '.' e as letras do padrão 
-    por letras contidas no conjunto de letras
+    Função que verifica, usando a função auxiliar testa_palavra_padrao_auxiliar, se é possível formar uma 
+    palavra substituindo os '.' e as letras do padrão por letras contidas no conjunto de letras
 
     Args:
         palavra (str): palavra que se pretende escrever
@@ -147,6 +150,20 @@ def testa_palavra_padrao(palavra, padrao, conj):
 
 
 def testa_palavra_padrao_auxiliar(palavra, padrao, conj):
+    """
+    Função auxiliar que caso seja possível substituir uma palavra num padrão, que contem '.' e letras,
+    por letras contidas num conjunto de letras devolve uma lista com as letras usadas. Caso contrário,
+    devolve uma lista vazia
+
+    Args:
+        palavra (str): palavra que se pretende escrever
+        padrao (str): string do mesmo comprimento que a palavra, composta por letras e '.'
+        conj (dict): dicionário de letras de formato {letra: ocorrências}
+
+    Return:
+        list: lista vazia caso não dê para substituir a palavra no padrão ou então devolve uma lista 
+              que contém as letras substituidas no padrão
+    """
     if len(palavra) != len(padrao):
         return []
     
@@ -158,7 +175,7 @@ def testa_palavra_padrao_auxiliar(palavra, padrao, conj):
         
         if letra_padrao == '.': 
 
-            # Verificar se a letra está no cojunto e se existem suficientes para usar
+            # Verificar se a letra está no cojunto e se existem occorrencias suficientes para usar
             if letra_palavra not in ocorrencias or ocorrencias[letra_palavra] == 0:
                 return []
             
@@ -338,7 +355,7 @@ def insere_palavra(tab, casa, direcao, palavra):
         inc_linha = 1
     
     else:
-        raise ValueError("insere_palavra: argumentos inválidos")
+        raise ValueError("insere_palavra: argumentos inválidos cccccc")
 
     for i in range(len(palavra)):
         nova_casa = cria_casa(linha + inc_linha * i, coluna + inc_coluna * i)
@@ -347,7 +364,8 @@ def insere_palavra(tab, casa, direcao, palavra):
     
     return tab
 
-
+tab=cria_tabuleiro()
+insere_palavra(tab,(1,5),'H', 'PROGRAMA')
 
 def tabuleiro_para_str(tab):
     """
@@ -397,7 +415,7 @@ def tabuleiro_para_str(tab):
     
     return resultado
 
-
+print(tabuleiro_para_str(tab))
 
 def cria_jogador(ordem,pontos,conj_letras):
     """
@@ -596,17 +614,11 @@ def processa_troca(jogada_recebida, jog, pilha):
             jog['letras'][l] -=1
             if jog['letras'][l] == 0:
                 del jog['letras'][l]
-    
-        letras_novas = []
-        for i in range(len(letras_para_troca)):
-            letras_novas.append(pilha[-1])
-            del pilha[-1]
-        for letra_nova in letras_novas:
-            if letra_nova not in jog['letras']:
-                jog['letras'][letra_nova] = jog['letras'].get(letra_nova ,0) + 1
-            else:
-                jog['letras'][letra_nova] += 1
+
+        for _ in range(len(letras_para_troca)):
+            distribui_letra(pilha, jog)
         return True
+
     return False
 
 
