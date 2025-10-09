@@ -288,22 +288,14 @@ def obtem_sequencia(tab, casa, direcao, tamanho):
     l, c = casa
     linha = l 
     coluna = c 
-
-    if direcao == 'H' and coluna + tamanho - 1 > 15:
-        raise ValueError("obtem_sequencia: argumentos inválidos")
-    
-    if direcao == 'V' and linha + tamanho - 1 > 15:
-        raise ValueError("obtem_sequencia: argumentos inválidos")
  
     inc_linha = 0
     inc_coluna = 0
     
     if direcao == "H":
         inc_coluna = 1
-    
     elif direcao == "V":
         inc_linha = 1
-    
     else:
         raise ValueError("obtem_sequencia: argumentos inválidos")
     
@@ -552,6 +544,11 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
     letras_usadas = ()
     linha, coluna = casa
     
+    if direcao == 'H' and coluna + len(palavra) - 1 > 15:
+        raise ValueError("joga_palavra: argumentos inválidos")
+    if direcao == 'V' and linha + len(palavra) - 1 > 15:
+        raise ValueError("joga_palavra: argumentos inválidos")
+
     if primeira:
         for i in range(len(palavra)):
             if direcao == 'H' and (linha, coluna + i) == (8, 8):
@@ -559,7 +556,7 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
             if direcao == 'V' and (linha + i, coluna) == (8, 8):
                 break
         else:
-                return ()
+            return ()
 
     padrao = obtem_sequencia(tab, casa, direcao, len(palavra))
     letras_usadas = []
@@ -615,20 +612,15 @@ def processa_jogada(tab, jog, pilha, pontos, primeira):
                 return False
 
         elif jogada_recebida[0] == 'T':
-            try:
-                if len(jogada_recebida) > 1 and processa_troca(jogada_recebida, jog, pilha):
-                    return True
-            except:
-                continue
+            if len(jogada_recebida) > 1 and processa_troca(jogada_recebida, jog, pilha):
+                return True
+
         
         elif jogada_recebida[0] == 'J':
-            try:
-                if type(jogada_recebida[1]) != int or type(jogada_recebida[2]) != int:
+            if type(jogada_recebida[1]) != int or type(jogada_recebida[2]) != int:
                     continue
-                if len(jogada_recebida) == 5 and jogar(tab, jog, pilha, jogada_recebida, primeira):
+            if len(jogada_recebida) == 5 and jogar(tab, jog, pilha, jogada_recebida, primeira):
                     return True
-            except:
-                continue
 
 
 
