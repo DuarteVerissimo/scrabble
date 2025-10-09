@@ -319,7 +319,6 @@ def obtem_sequencia(tab, casa, direcao, tamanho):
 
 
 
-
 def insere_palavra(tab, casa, direcao, palavra):
     """
     Função que insere uma palavra no tabuleiro a partir de uma casa e direção,
@@ -354,9 +353,6 @@ def insere_palavra(tab, casa, direcao, palavra):
     elif direcao == 'V':
         inc_linha = 1
     
-    else:
-        raise ValueError("insere_palavra: argumentos inválidos")
-
     for i in range(len(palavra)):
         nova_casa = cria_casa(linha + inc_linha * i, coluna + inc_coluna * i)
         
@@ -469,7 +465,7 @@ def jogador_para_str(jog):
     Função que converte um jogador(dicionário) numa string legível
 
     Args:
-        jog (dict): jogador {'id', 'pontos', 'letras'}
+        jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
 
     Return:
         str: representação textual do jogador
@@ -595,31 +591,60 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
 
 def processa_jogada(tab, jog, pilha, pontos, primeira):
     """"
-    Função que recebe um input
+    Função que processa o turno completo de um jogador, até ele inserir uma jogada válida. Recebe um input com a 
+    jogada desejada pelo jogador, se for 'P' passa e devolve False, se for 'T <seq_letras>' devolve True e altera
+    o conjunto de letras e a pilha e se for 'J <linha> <coluna> <dir> <palavra>' joga uma palavra, atualiza o 
+    tabuleiro, o conjunto de letras do jogador, a sua pontuação e pilha
+    
+    Args:
+        tab (list): tabuleiro de jogo 15x15
+        jog (dict): dicionário que representa o jogador
+        pilha (list): lista de letras disponíveis (saco)
+        pontos (dict): dicionário com as pontuações de cada letra
+        primeira (bool): True se for a primeira jogada do jogo
+
+    Return:
+        bool: True se a jogada for válida, False caso contrário
     """
     while True:
         jogada = input("Jogada J" + str(jog['id']) + ": ")
         jogada_recebida = jogada.split()
         
         if jogada_recebida[0] == 'P':
-            return False
+            if len(jogada_recebida ) == 1:
+                return False
 
         elif jogada_recebida[0] == 'T':
-            if processa_troca(jogada_recebida, jog, pilha):
-                return True
-
+            try:
+                if len(jogada_recebida) > 1 and processa_troca(jogada_recebida, jog, pilha):
+                    return True
+            except:
+                continue
+        
         elif jogada_recebida[0] == 'J':
-            if jogar(tab, jog, pilha, jogada_recebida, primeira):
-                return True
+            try:
+                if type(jogada_recebida[1]) != int or type(jogada_recebida[2]) != int:
+                    continue
+                if len(jogada_recebida) == 5 and jogar(tab, jog, pilha, jogada_recebida, primeira):
+                    return True
+            except:
+                continue
+
 
 
 def processa_troca(jogada_recebida, jog, pilha):
-#converter a sequencia numa lista(.split())
-#validar input(se jogador tem as letras)
-#tirar do conjunto de letras as letras da sequencia
-#adiciona da lista de letras as ultimas
-#isto se estiverem pelo menos 7 letras no saco
-#se for valida retorna true
+    """
+    Função auxiliar que caso o jogador decida trocar as letras do seu conjunto('T'), troca as letras escolhidas
+    pelas as ultimas da pilha
+
+    Args:
+        jogada_recebida (list): lista que contem o input com as informações necessárias
+        jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
+        pilha (list): lista de letras disponíveis (saco)
+
+    Return:
+        bool: retorna True caso a jogada seja válida e False caso seja inválida
+    """
     letras_para_troca = jogada_recebida[1:]
     
     for letra in letras_para_troca:
@@ -640,8 +665,20 @@ def processa_troca(jogada_recebida, jog, pilha):
 
 
 def jogar(tab, jog, pilha, jogada_recebida, primeira):
-    #usar funcao joga palavra para saber se e valida
-    #se a jogada for valida devolve true e atualiza os pontos do jogador e retira as letras usadas
+    """
+    Função auxiliar que caso o jogador decida jogar('J') e a jogada seja válida, insere a palavra no tabuleiro,
+    atualiza o conunto de letras do jogador e atualiza também a pontuação do jogador
+
+    Args:
+        tab (list): tabuleiro 15x15
+        jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
+        pilha (list): lista de letras disponíveis (saco)
+        jogada_recebida (list): lista que contem o input com as informações necessárias
+        primeira (bool): bool que identifica se é a primeira jogada
+
+    Return:
+        bool: retorna True caso a jogada seja válida e False caso seja inválida
+    """
     linha = int(jogada_recebida[1])
     coluna = int(jogada_recebida[2])
     casa = cria_casa(linha, coluna)
@@ -668,7 +705,7 @@ def jogar(tab, jog, pilha, jogada_recebida, primeira):
 
 def pontuar_lista_de_letras(lista_de_letras):
     """"
-    Função que recebe uma lista de letras e determina a pontução dela
+    Função auxiliar que recebe uma lista de letras e determina a pontução dela
 
     Args:
         lista_de_letras (list): lista de letras
@@ -688,8 +725,8 @@ def scrabble(jogadores, saco, pontos, estado):
     Função principal que permite jogar o jogo com 2 a 4 jogadores    
     Args:
         jogadores (int): número de jogadores no jogo
-        saco (): conjunto de todas as letras do jogo
-        pontos (dict): dicionário onde a cada letra corrosponde uma pontuação
+        saco (dict): conjunto de todas as letras do jogo
+        pontos (dict): dicionário com as pontuações de cada letra
         estado (int): estado do gera_numeros_aleatorios
 
     Return:
@@ -702,6 +739,8 @@ def scrabble(jogadores, saco, pontos, estado):
     print("Bem-vindo ao SCRABBLE.")
     tab=cria_tabuleiro()
     
+    if len(saco)==0:
+        raise ValueError('scrabble: argumentos inválidos')
     if type(jogadores) != int or jogadores not in(2, 3, 4):
         raise ValueError('scrabble: argumentos inválidos')
     if type(estado) != int or estado < 0:
@@ -748,4 +787,3 @@ def scrabble(jogadores, saco, pontos, estado):
                 break
     
     return tuple(jog['pontos'] for jog in lista_jogadores)
-
