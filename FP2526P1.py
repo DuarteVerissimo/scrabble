@@ -3,7 +3,7 @@
 ABECEDARIO = ('A','B','C','Ç','D','E','F','G','H','I','J','L','M','N','O',
                   'P','Q','R','S','T','U','V','X','Z')
 
-PONTOS = {  
+pontos = {  
     'A': 1, 'B': 3, 'C': 2, 'Ç': 3, 'D': 2, 'E': 1,
     'F': 4, 'G': 4, 'H': 4, 'I': 1, 'J': 5, 'L': 2,
     'M': 1, 'N': 3, 'O': 1, 'P': 2, 'Q': 6, 'R': 1,
@@ -121,10 +121,10 @@ def baralha_conjunto(conj, estado):
         list: lista de letras baralhada, contendo todas as letras e as ocorrências delas
     """
     lista_letras = []
-    for letra in conj:
-        lista_letras.extend([letra] * conj[letra])
+    for letra in ABECEDARIO:
+        if letra in conj:
+            lista_letras.extend([letra] * conj[letra])
     
-    lista_letras = sorted(lista_letras, key= lambda x: ABECEDARIO.index(x))
     permuta_letras(lista_letras, estado)
     
     return lista_letras
@@ -658,26 +658,58 @@ def jogar(tab, jog, pilha, jogada_recebida, primeira):
             del jog['letras'][l]
         
         distribui_letra(pilha, jog)
-    
-    jog['pontos'] += pontuar_lista_de_letras(letras_usadas)
+    palavra = list(palavra)
+
+    jog['pontos'] += pontuar_lista_de_letras(palavra)
     
     return True
 
+
+
 def pontuar_lista_de_letras(lista_de_letras):
+    """"
+    Função que recebe uma lista de letras e determina a pontução dela
+
+    Args:
+        lista_de_letras (list): lista de letras
+
+    Return:
+        int: pontuação total das letras dessa lista
+    """
     pontuacao = 0
     for letra in lista_de_letras:
-        pontuacao += PONTOS[letra]
+        pontuacao += pontos[letra]
     return pontuacao
 
-def scrable(jogadores, saco, pontos, estado):
+
+
+def scrabble(jogadores, saco, pontos, estado):
+    """"
+    Função principal que permite jogar o jogo com 2 a 4 jogadores    
+    Args:
+        jogadores (int): número de jogadores no jogo
+        saco (): conjunto de todas as letras do jogo
+        pontos (dict): dicionário onde a cada letra corrosponde uma pontuação
+        estado (int): estado do gera_numeros_aleatorios
+
+    Return:
+        tuplo: devolve um tuplo com as pontuações dos jogadores
+
+    Raise:
+        ValueError: se o número de jogadores não for inteiro ou não for igual a 2,3 ou 4
+                    se o estado não for inteiro positivo
+    """
     print("Bem-vindo ao SCRABBLE.")
     tab=cria_tabuleiro()
     
     if type(jogadores) != int or jogadores not in(2, 3, 4):
-        raise ValueError('scrabble:argumentos inválidos')
+        raise ValueError('scrabble: argumentos inválidos')
     if type(estado) != int or estado < 0:
-        raise ValueError('scrabble:argumentos inválidos')
-    
+        raise ValueError('scrabble: argumentos inválidos')
+    for letra in ABECEDARIO:
+        if letra not in pontos:
+            raise ValueError('scrabble: argumentos inválidos')
+
     pilha = baralha_conjunto(saco, estado)
     
     lista_jogadores = []
@@ -688,38 +720,32 @@ def scrable(jogadores, saco, pontos, estado):
                 distribui_letra(pilha, jog)
             lista_jogadores.append(jog)
     
-    # Primeira Jogada
-    for jog in lista_jogadores:
+    # Ciclo de jogadas depois da primeiras
+    passagens_seguidas = 0
+    jogo_continua = True
+    primeira = True
+    while jogo_continua:
+        for jog in lista_jogadores:
             print(tabuleiro_para_str(tab))
-            print(jogador_para_str(jog))
-            processa_jogada(tab, jog, pilha, pontos, True)
+            for j in range(jogadores):
+                print(jogador_para_str(lista_jogadores[j]))
+            
+            res = processa_jogada(tab, jog, pilha, pontos, primeira)
+            
+            if primeira == True:
+                primeira = False
+
+            if res == False:
+                passagens_seguidas += 1
+            else:
+                passagens_seguidas = 0
+
+            if passagens_seguidas== jogadores:
+                jogo_continua = False
+        
+            if jog['letras'] =={} and pilha == []:
+                jogo_continua = False
+                break
     
-    # Ciclo de jogadas
-    while True:
-        for jog in jogadores:
-            print(tabuleiro_para_str(tab))
-            print(jogador_para_str(jog))
-            processa_jogada(tab, jog, pilha, pontos, False)
-        
-        for letra in jog['letras']:
-            if jog['letras'][letra] == 0 and pilha == []:
-                return False
-        
-        
-
-        
-
-        
-        
-    
-    
-    # baralha letras
-    # distribui 7 letras por cada jogadore por ordem
-    #o jogo desenvolve se 
-
-
-
-
-
-    #DEVOLVE UM TUPLO COM A PONTUANCAO FINAL DE CADA JOGADOR
+    return tuple(jog['pontos'] for jog in lista_jogadores)
 
