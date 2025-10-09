@@ -355,7 +355,7 @@ def insere_palavra(tab, casa, direcao, palavra):
         inc_linha = 1
     
     else:
-        raise ValueError("insere_palavra: argumentos inválidos cccccc")
+        raise ValueError("insere_palavra: argumentos inválidos")
 
     for i in range(len(palavra)):
         nova_casa = cria_casa(linha + inc_linha * i, coluna + inc_coluna * i)
@@ -416,7 +416,7 @@ def tabuleiro_para_str(tab):
 
 
 
-def cria_jogador(ordem,pontos,conj_letras):
+def cria_jogador(ordem, pontos, conj_letras):
     """
     Função que cria um jogador de Scrabble
 
@@ -555,12 +555,6 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
     """
     letras_usadas = ()
     linha, coluna = casa
-
-    if direcao == 'H' and len(palavra) + coluna - 1 > 15:
-        raise ValueError("joga_palavra: argumentos inválidos")
-    
-    if direcao == 'V' and len(palavra) + linha - 1 > 15:
-        raise ValueError("joga_palavra: argumentos inválidos")
     
     if primeira:
         for i in range(len(palavra)):
@@ -601,6 +595,7 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
 
 def processa_jogada(tab, jog, pilha, pontos, primeira):
     """"
+    Função que recebe um input
     """
     while True:
         jogada = input("Jogada J" + str(jog['id']) + ": ")
@@ -674,19 +669,57 @@ def pontuar_lista_de_letras(lista_de_letras):
         pontuacao += PONTOS[letra]
     return pontuacao
 
-""""
-def scrable():
+def scrable(jogadores, saco, pontos, estado):
+    print("Bem-vindo ao SCRABBLE.")
+    tab=cria_tabuleiro()
+    
+    if type(jogadores) != int or jogadores not in(2, 3, 4):
+        raise ValueError('scrabble:argumentos inválidos')
+    if type(estado) != int or estado < 0:
+        raise ValueError('scrabble:argumentos inválidos')
+    
+    pilha = baralha_conjunto(saco, estado)
+    
+    lista_jogadores = []
+    # Distribuir 7 peças por cada jogador
+    for i in range(1, jogadores + 1):
+            jog=cria_jogador(i, 0, {})
+            for _ in range(7):
+                distribui_letra(pilha, jog)
+            lista_jogadores.append(jog)
+    
+    # Primeira Jogada
+    for jog in lista_jogadores:
+            print(tabuleiro_para_str(tab))
+            print(jogador_para_str(jog))
+            processa_jogada(tab, jog, pilha, pontos, True)
+    
+    # Ciclo de jogadas
+    while True:
+        for jog in jogadores:
+            print(tabuleiro_para_str(tab))
+            print(jogador_para_str(jog))
+            processa_jogada(tab, jog, pilha, pontos, False)
+        
+        for letra in jog['letras']:
+            if jog['letras'][letra] == 0 and pilha == []:
+                return False
+        
+        
+
+        
+
+        
+        
+    
+    
     # baralha letras
-    # distribui letras por jogadores
-    # ... (Duarte continua!)
-"""
+    # distribui 7 letras por cada jogadore por ordem
+    #o jogo desenvolve se 
 
 
 
 
 
-tab=cria_tabuleiro()
-insere_palavra(tab,(1,5),'H', 'PROGRAMA')
-print(joga_palavra(tab, 'LUTA', (7,8), 'V',cria_conjunto(('A', 'D', 'U','O','T','L','F'),(1,1,1,1,1,1,1)), True))
-print(tabuleiro_para_str(tab))
-print(joga_palavra(tab, 'LUTA', (7,8), 'V',cria_conjunto(('A', 'D', 'U','O','T','L','F'),(1,1,1,1,1,1,1)), True))
+    #DEVOLVE UM TUPLO COM A PONTUANCAO FINAL DE CADA JOGADOR
+
