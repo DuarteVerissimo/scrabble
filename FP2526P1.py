@@ -612,15 +612,13 @@ def processa_jogada(tab, jog, pilha, pontos, primeira):
                 return False
 
         elif jogada_recebida[0] == 'T':
-            if len(jogada_recebida) > 1 and processa_troca(jogada_recebida, jog, pilha):
+            if processa_troca(jogada_recebida, jog, pilha):
                 return True
 
         
         elif jogada_recebida[0] == 'J':
-            if type(jogada_recebida[1]) != int or type(jogada_recebida[2]) != int:
-                    continue
-            if len(jogada_recebida) == 5 and jogar(tab, jog, pilha, jogada_recebida, primeira):
-                    return True
+            if jogar(tab, jog, pilha, jogada_recebida, primeira):
+                return True
 
 
 
@@ -731,8 +729,11 @@ def scrabble(jogadores, saco, pontos, estado):
     print("Bem-vindo ao SCRABBLE.")
     tab=cria_tabuleiro()
     
-    if len(saco)==0:
+    if saco == {}:
         raise ValueError('scrabble: argumentos inválidos')
+    for letra in saco:
+        if saco[letra] < 0:
+            raise ValueError('scrabble: argumentos inválidos')
     if type(jogadores) != int or jogadores not in(2, 3, 4):
         raise ValueError('scrabble: argumentos inválidos')
     if type(estado) != int or estado < 0:
@@ -740,7 +741,9 @@ def scrabble(jogadores, saco, pontos, estado):
     for letra in ABECEDARIO:
         if letra not in pontos:
             raise ValueError('scrabble: argumentos inválidos')
-
+    if type(pontos) != dict:
+        raise ValueError('scrabble: argumentos inválidos')
+    
     pilha = baralha_conjunto(saco, estado)
     
     lista_jogadores = []
