@@ -3,7 +3,7 @@
 ABECEDARIO = ('A','B','C','Ç','D','E','F','G','H','I','J','L','M','N','O',
                   'P','Q','R','S','T','U','V','X','Z')
 
-pontos = {  
+PONTOS = {  
     'A': 1, 'B': 3, 'C': 2, 'Ç': 3, 'D': 2, 'E': 1,
     'F': 4, 'G': 4, 'H': 4, 'I': 1, 'J': 5, 'L': 2,
     'M': 1, 'N': 3, 'O': 1, 'P': 2, 'Q': 6, 'R': 1,
@@ -553,8 +553,7 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
         return ()
     
 
-
-def processa_jogada(tab ,jog ,pilha ,pontos ,primeira):
+def processa_jogada(tab, jog, pilha, pontos, primeira):
     while True:
         jogada = input("Jogada J" + str(jog['id']) + ": ")
         jogada_recebida = jogada.split()
@@ -563,52 +562,92 @@ def processa_jogada(tab ,jog ,pilha ,pontos ,primeira):
             return False
 
         elif jogada_recebida[0] == 'T':
-            if processa_troca(...):
+            if processa_troca(jogada_recebida, jog, pilha):
                 return True
-            #converter a sequencia numa lista(.split())
-            #validar input(se jogador tem as letras)
-            
-            #tirar do conjunto de letras as letras da sequencia
-            #adiciona da lista de letras as ultimas
-            #isto se estiverem pelo menos 7 letras no saco
-            #se for valida retorna true
+            else:
+                return False
 
-            #fazer funcoes auxiliares que
-        
         elif jogada_recebida[0] == 'J':
-            if jogada_jogar(...):
+            if jogar(tab, jog, pilha, jogada_recebida, primeira):
                 return True
+            else:
+                return False
 
-def processa_troca(jogada, conj_letra....):
-    #...
-    return FALSE
-    # ...
-    return TRUE
-
-def jogada_jogar(jogada):
-   #...
-    return FALSE
-    # ...
-    return TRUE
-
-
-conj1 = cria_conjunto(('A','U','O','T','X','F'),(2,1,1,1,1,1))
-jog1=cria_jogador(2, 0, conj1)
-tab = cria_tabuleiro()
-pilha = ['S', 'B', 'P', 'E', 'C', 'E', 'E', 'S', 'J', 'D', 'I']
-# print(processa_jogada(tab, jog1, pilha, pontos, True))
-print(jogada_troca(jog, pilha))
-print(jog) # ver se 
-print(pilha)
+def processa_troca(jogada_recebida, jog, pilha):
+#converter a sequencia numa lista(.split())
+#validar input(se jogador tem as letras)
+#tirar do conjunto de letras as letras da sequencia
+#adiciona da lista de letras as ultimas
+#isto se estiverem pelo menos 7 letras no saco
+#se for valida retorna true
+    troca_valida = True
+    letras_para_troca = jogada_recebida[1:]
     
-        
+    for letra in letras_para_troca:
+        if letra not in jog['letras'] or jog['letras'][letra] < letras_para_troca.count(letra):
+            troca_valida = False
+    
+    if troca_valida and len(pilha) >= 7:
+        for l in letras_para_troca:
+            jog['letras'][l] -=1
+            if jog['letras'][l] == 0:
+                del jog['letras'][l]
+    
+        letras_novas = []
+        for i in range(len(letras_para_troca)):
+            letras_novas.append(pilha[-1])
+            del pilha[-1]
+        for letra_nova in letras_novas:
+            if letra_nova not in jog['letras']:
+                jog['letras'][letra_nova] = jog['letras'].get(letra_nova ,0) + 1
+            else:
+                jog['letras'][letra_nova] += 1
+        return True
+    return False
 
 
 
+def jogar(tab, jog, pilha, jogada_recebida, primeira):
+    #usar funcao joga palavra para saber se e valida
+    #se a jogada for valida devolve true e atualiza os pontos do jogador e retira as letras usadas
+    linha = jogada_recebida[1]
+    coluna = jogada_recebida[2]
+    casa = cria_casa(linha, coluna)
+    direcao = jogada_recebida[3]
+    palavra = jogada_recebida[4:]
+    letras_usadas = list(joga_palavra(tab, palavra, casa, direcao, jog['letras'], primeira))
 
+    if len(letras_usadas) == 0:
+        return False
+    for l in letras_usadas:
+        jog['letras'][l] -=1
+        if jog['letras'][l] == 0:
+            del jog['letras'][l]
+    letras_novas = []
+    
+    for i in range(len(letras_usadas)):
+        letras_novas.append(pilha[-1])
+        del pilha[-1]
+    
+    for letra_nova in letras_novas:
+        if letra_nova not in jog['letras']:
+            jog['letras'][letra_nova] = jog['letras'].get(letra_nova ,0) + 1
+        else:
+            jog['letras'][letra_nova] += 1
+    
+    jog['pontos'] += pontuar_lista_de_letras(letras_usadas)
+    
+    return True
 
+def pontuar_lista_de_letras(lista_de_letras):
+    pontuacao = 0
+    for letra in lista_de_letras:
+        pontuacao += PONTOS[letra]
+    return pontuacao
 
+""""
 def scrable():
     # baralha letras
     # distribui letras por jogadores
     # ... (Duarte continua!)
+"""
