@@ -364,8 +364,7 @@ def insere_palavra(tab, casa, direcao, palavra):
     
     return tab
 
-tab=cria_tabuleiro()
-insere_palavra(tab,(1,5),'H', 'PROGRAMA')
+
 
 def tabuleiro_para_str(tab):
     """
@@ -415,7 +414,7 @@ def tabuleiro_para_str(tab):
     
     return resultado
 
-print(tabuleiro_para_str(tab))
+
 
 def cria_jogador(ordem,pontos,conj_letras):
     """
@@ -536,17 +535,28 @@ def distribui_letra(letras,jogador):
 
 
 def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
+    """"
+    Função que, se não sair do tabuleiro e respeitar as regras do jogo, forma uma palavra no tabuleiro
+    com um conjunto de letras e devolve um tuplo com as letras usadas por ordem alfabética. Caso não 
+    consiga jogar a palavra 
+    """
     letras_usadas = ()
     linha, coluna = casa
 
     if direcao == 'H' and len(palavra) + coluna - 1 > 15:
-        raise ValueError("...")
+        raise ValueError("joga_palavra: argumentos inválidos")
     
     if direcao == 'V' and len(palavra) + linha - 1 > 15:
-        raise ValueError("...")
+        raise ValueError("joga_palavra: argumentos inválidos")
     
-    if primeira and (linha != 8 or coluna != 8):
-        return ()
+    if primeira:
+        for i in range(len(palavra)):
+            if direcao == 'H' and (linha, coluna + i) == (8, 8):
+                break
+            if direcao == 'V' and (linha + i, coluna) == (8, 8):
+                break
+        else:
+                return ()
 
     padrao = obtem_sequencia(tab, casa, direcao, len(palavra))
     letras_usadas = []
@@ -575,7 +585,10 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
         return ()
     
 
+
 def processa_jogada(tab, jog, pilha, pontos, primeira):
+    """"
+    """
     while True:
         jogada = input("Jogada J" + str(jog['id']) + ": ")
         jogada_recebida = jogada.split()
@@ -586,14 +599,11 @@ def processa_jogada(tab, jog, pilha, pontos, primeira):
         elif jogada_recebida[0] == 'T':
             if processa_troca(jogada_recebida, jog, pilha):
                 return True
-            else:
-                return False
 
         elif jogada_recebida[0] == 'J':
             if jogar(tab, jog, pilha, jogada_recebida, primeira):
                 return True
-            else:
-                return False
+
 
 def processa_troca(jogada_recebida, jog, pilha):
 #converter a sequencia numa lista(.split())
@@ -602,14 +612,13 @@ def processa_troca(jogada_recebida, jog, pilha):
 #adiciona da lista de letras as ultimas
 #isto se estiverem pelo menos 7 letras no saco
 #se for valida retorna true
-    troca_valida = True
     letras_para_troca = jogada_recebida[1:]
     
     for letra in letras_para_troca:
         if letra not in jog['letras'] or jog['letras'][letra] < letras_para_troca.count(letra):
-            troca_valida = False
+            return False
     
-    if troca_valida and len(pilha) >= 7:
+    if len(pilha) >= 7:
         for l in letras_para_troca:
             jog['letras'][l] -=1
             if jog['letras'][l] == 0:
@@ -626,30 +635,23 @@ def processa_troca(jogada_recebida, jog, pilha):
 def jogar(tab, jog, pilha, jogada_recebida, primeira):
     #usar funcao joga palavra para saber se e valida
     #se a jogada for valida devolve true e atualiza os pontos do jogador e retira as letras usadas
-    linha = jogada_recebida[1]
-    coluna = jogada_recebida[2]
+    linha = int(jogada_recebida[1])
+    coluna = int(jogada_recebida[2])
     casa = cria_casa(linha, coluna)
     direcao = jogada_recebida[3]
-    palavra = jogada_recebida[4:]
+    palavra = jogada_recebida[4]
     letras_usadas = list(joga_palavra(tab, palavra, casa, direcao, jog['letras'], primeira))
 
-    if len(letras_usadas) == 0:
+    if len(letras_usadas) == 0 :
         return False
+    
     for l in letras_usadas:
         jog['letras'][l] -=1
         if jog['letras'][l] == 0:
             del jog['letras'][l]
-    letras_novas = []
     
-    for i in range(len(letras_usadas)):
-        letras_novas.append(pilha[-1])
-        del pilha[-1]
-    
-    for letra_nova in letras_novas:
-        if letra_nova not in jog['letras']:
-            jog['letras'][letra_nova] = jog['letras'].get(letra_nova ,0) + 1
-        else:
-            jog['letras'][letra_nova] += 1
+    for _ in range(len(letras_usadas)): 
+        distribui_letra(pilha, jog)
     
     jog['pontos'] += pontuar_lista_de_letras(letras_usadas)
     
@@ -667,3 +669,13 @@ def scrable():
     # distribui letras por jogadores
     # ... (Duarte continua!)
 """
+
+
+
+
+
+tab=cria_tabuleiro()
+insere_palavra(tab,(1,5),'H', 'PROGRAMA')
+print(joga_palavra(tab, 'LUTA', (7,8), 'V',cria_conjunto(('A', 'D', 'U','O','T','L','F'),(1,1,1,1,1,1,1)), True))
+print(tabuleiro_para_str(tab))
+print(joga_palavra(tab, 'LUTA', (7,8), 'V',cria_conjunto(('A', 'D', 'U','O','T','L','F'),(1,1,1,1,1,1,1)), True))
