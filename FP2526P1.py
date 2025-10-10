@@ -1,14 +1,12 @@
-# This is the Python script for your project
+# ist1117729
 
 ABECEDARIO = ('A','B','C','Ç','D','E','F','G','H','I','J','L','M','N','O',
                   'P','Q','R','S','T','U','V','X','Z')
 
-pontos = {  
-    'A': 1, 'B': 3, 'C': 2, 'Ç': 3, 'D': 2, 'E': 1,
-    'F': 4, 'G': 4, 'H': 4, 'I': 1, 'J': 5, 'L': 2,
-    'M': 1, 'N': 3, 'O': 1, 'P': 2, 'Q': 6, 'R': 1,
-    'S': 1, 'T': 1, 'U': 1, 'V': 4, 'X': 8, 'Z': 8}
-
+NUM_LETRAS_JOGADOR = 7
+NUM_MAX_JOGADORES = 4
+NUM_MIN_JOGADORES = 2
+TAMANHO_DO_TABULEIRO = 15
 
 def cria_conjunto(let, occ):
     """
@@ -17,8 +15,8 @@ def cria_conjunto(let, occ):
 
     Args:
         let (tuppl): letras(strings de 1 caractere)
-        occ (tupple): tuplo de inteiros positivos, cada um representando o número de ocorrências da 
-                     letra correspondente em "let"
+        occ (tupple):   tuplo de números inteiros positivos, cada um representando o número de 
+                        ocorrências da letra correspondente em "let"
 
     Returns:
         dict: dicionário {letra: ocorrências}, representando o conjunto de letras
@@ -71,13 +69,7 @@ def gera_numero_aleatorio(estado):
 
     Returns:
         int: número pseudo-aleatório(novo estado do gerador)
-    
-    Raises:
-        ValueError: se o estado não for um número inteiro positivo
     """
-    if not type(estado) == int and  estado < 0 :
-        raise ValueError("gera_numero_aleatorio: argumentos inválidos")
-    
     # Algoritmo xorshift32 (32 bits)
     estado ^= (estado << 13) & 0xFFFFFFFF
     estado ^= (estado >> 17) & 0xFFFFFFFF
@@ -199,8 +191,8 @@ def cria_tabuleiro():
     """
     tab = []
     
-    for _ in range(15):
-        linha = ['.'] * 15
+    for _ in range(TAMANHO_DO_TABULEIRO):
+        linha = ['.'] * TAMANHO_DO_TABULEIRO
         tab.append(linha)
     
     return tab
@@ -221,7 +213,9 @@ def cria_casa(l, c):
         ValueError: se os números recebidos não forem inteiros
                     se os números recebidos forem menores que 1 e maiores que 15
     """
-    if not type(l) == int or not type(c) == int or l < 1 or l > 15 or c < 1 or c > 15:
+    if (not type(l) == int or not type(c) == int 
+        or not 1 <= l <= TAMANHO_DO_TABULEIRO 
+        or not 1 <= c <= TAMANHO_DO_TABULEIRO):
         raise ValueError("cria_casa: argumentos inválidos")
     
     return (l, c)
@@ -319,10 +313,9 @@ def insere_palavra(tab, casa, direcao, palavra):
     """
     linha, coluna = casa
 
-    if direcao == 'H' and coluna + len(palavra) - 1 > 15:
+    if direcao == 'H' and coluna + len(palavra) - 1 > TAMANHO_DO_TABULEIRO:
         raise ValueError("insere_palavra: argumentos inválidos")
-    
-    if direcao == 'V' and linha + len(palavra) - 1 > 15:
+    if direcao == 'V' and linha + len(palavra) - 1 > TAMANHO_DO_TABULEIRO:
         raise ValueError("insere_palavra: argumentos inválidos")
 
     inc_linha = 0
@@ -363,7 +356,7 @@ def tabuleiro_para_str(tab):
     tabuleiro.append("   +" + "-" * 31 + "+")
 
     # Cada linha do tabuleiro é constitiuda pelo número da linha e o conteúdo das células
-    for i in range(15):
+    for i in range(TAMANHO_DO_TABULEIRO):
         if i + 1 < 10:
             numeros_das_linhas = ' ' + str(i + 1)
         
@@ -372,10 +365,10 @@ def tabuleiro_para_str(tab):
     
         linha = numeros_das_linhas + " |"
         
-        for j in range(15):
+        for j in range(TAMANHO_DO_TABULEIRO):
             linha += " " + tab[i][j]
         
-        linha+=" |"
+        linha += " |"
         
         tabuleiro.append(linha)
     
@@ -415,7 +408,7 @@ def cria_jogador(ordem, pontos, conj_letras):
                     se o jogador tiver mais de 7 letras
     """
 
-    if not type(ordem) == int or ordem not in(1,2,3,4):
+    if not type(ordem) == int or not 0 < ordem <= NUM_MAX_JOGADORES:
         raise ValueError("cria_jogador: argumentos inválidos")
     
     if not type(pontos) == int or pontos<0:
@@ -434,7 +427,7 @@ def cria_jogador(ordem, pontos, conj_letras):
             raise ValueError("cria_jogador: argumentos inválidos")
         total += occ
 
-    if total > 7:
+    if total > NUM_LETRAS_JOGADOR:
         raise ValueError("cria_jogador: argumentos inválidos")
     
     # Cria e devolve o dicionário do jogador
@@ -482,7 +475,6 @@ def jogador_para_str(jog):
             res += " "
    
     return res
-
 
 
 def distribui_letra(letras,jogador):
@@ -574,7 +566,6 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
         return ()
     
 
-
 def processa_jogada(tab, jog, pilha, pontos, primeira):
     """"
     Função que processa o turno completo de um jogador, até ele inserir uma jogada válida. Recebe um input com a 
@@ -596,6 +587,8 @@ def processa_jogada(tab, jog, pilha, pontos, primeira):
     while True:
         # Recebe um input com as instruções do jogador
         jogada = input("Jogada J" + str(jog['id']) + ": ")
+        if '  'in jogada:
+            continue
         jogada_recebida = jogada.split()
         
         # Caso o jogador queira passar
@@ -610,9 +603,8 @@ def processa_jogada(tab, jog, pilha, pontos, primeira):
 
         # Caso o jogador queira jogar uma palavra
         elif jogada_recebida[0] == 'J':
-            if jogar(tab, jog, pilha, jogada_recebida, primeira):
+            if jogar(tab, jog, pilha, jogada_recebida, primeira, pontos):
                 return True
-
 
 
 def processa_troca(jogada_recebida, jog, pilha):
@@ -650,7 +642,7 @@ def processa_troca(jogada_recebida, jog, pilha):
 
 
 
-def jogar(tab, jog, pilha, jogada_recebida, primeira):
+def jogar(tab, jog, pilha, jogada_recebida, primeira, pontos):
     """
     Função auxiliar que caso o jogador decida jogar('J') e a jogada seja válida, insere a palavra no tabuleiro,
     atualiza o conunto de letras do jogador e atualiza também a pontuação do jogador
@@ -665,8 +657,6 @@ def jogar(tab, jog, pilha, jogada_recebida, primeira):
     Returns:
         bool: retorna True caso a jogada seja válida e False caso seja inválida
     """
-    if type(jogada_recebida[1]) == '?' and type(jogada_recebida[1]) == '?':
-        return False
     if len(jogada_recebida)<5:
         return False
 
@@ -692,13 +682,12 @@ def jogar(tab, jog, pilha, jogada_recebida, primeira):
         distribui_letra(pilha, jog)
 
     # Atualiza a pontuação do jogador
-    jog['pontos'] += pontuar_lista_de_letras(list(palavra))
+    jog['pontos'] += pontuar_lista_de_letras(list(palavra), pontos)
     
     return True
 
 
-
-def pontuar_lista_de_letras(lista_de_letras):
+def pontuar_lista_de_letras(lista_de_letras, pontos):
     """"
     Função auxiliar que recebe uma lista de letras e determina a pontução dela
 
@@ -718,6 +707,7 @@ def pontuar_lista_de_letras(lista_de_letras):
 def scrabble(jogadores, saco, pontos, estado):
     """"
     Função principal que permite jogar o jogo com 2 a 4 jogadores    
+    
     Args:
         jogadores (int): número de jogadores no jogo
         saco (dict): conjunto de todas as letras do jogo
@@ -737,17 +727,18 @@ def scrabble(jogadores, saco, pontos, estado):
     if saco == {}:
         raise ValueError('scrabble: argumentos inválidos')
     for letra in saco:
-        if saco[letra] < 0:
+        if saco[letra] <= 0 or letra not in ABECEDARIO:
             raise ValueError('scrabble: argumentos inválidos')
-    if type(jogadores) != int or jogadores not in(2, 3, 4):
+    if type(jogadores) != int or not NUM_MIN_JOGADORES <= jogadores <= NUM_MAX_JOGADORES:
         raise ValueError('scrabble: argumentos inválidos')
-    if type(estado) != int or estado < 0:
+    if type(estado) != int:
         raise ValueError('scrabble: argumentos inválidos')
-    for letra in ABECEDARIO:
-        if letra not in pontos:
-            raise ValueError('scrabble: argumentos inválidos')
     if type(pontos) != dict:
-        raise ValueError('scrabble: argumentos inválidos')
+        raise ValueError('scrabble: argumentos inválidos')    
+    for letra in ABECEDARIO:
+        if letra not in pontos or pontos[letra] <= 0:
+            raise ValueError('scrabble: argumentos inválidos')
+
     
     pilha = baralha_conjunto(saco, estado)
     
@@ -755,7 +746,7 @@ def scrabble(jogadores, saco, pontos, estado):
     lista_jogadores = []
     for i in range(1, jogadores + 1):
             jog=cria_jogador(i, 0, {})
-            for _ in range(7):
+            for _ in range(NUM_LETRAS_JOGADOR):
                 distribui_letra(pilha, jog)
             lista_jogadores.append(jog)
     
@@ -787,6 +778,7 @@ def scrabble(jogadores, saco, pontos, estado):
             # Acaba o jogo se todos passarem
             if passagens_seguidas== jogadores:
                 jogo_continua = False
+                break
         
             # Acaba o jogo se o saco não tiver letras e se um jogador ficar sem letras
             if jog['letras'] =={} and pilha == []:
