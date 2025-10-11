@@ -216,7 +216,7 @@ def cria_casa(l, c):
     if (not type(l) == int or not type(c) == int 
         or not 1 <= l <= TAMANHO_DO_TABULEIRO 
         or not 1 <= c <= TAMANHO_DO_TABULEIRO):
-        raise ValueError("cria_casa: argumentos inválidos")
+        raise ValueError(f"cria_casa: argumentos inválidos")
     
     return (l, c)
 
@@ -269,8 +269,7 @@ def obtem_sequencia(tab, casa, direcao, tamanho):
         str: sequência de caracteres do tabuleiro
 
     Raise:
-        ValueError: se a o tamanho da sequencia passar as bordas do tabuleiro
-                    se a direção for diferente de 'H' ou 'V'
+        ValueError: se a direção for diferente de 'H' ou 'V'
     """
     linha, coluna = casa
  
@@ -286,8 +285,15 @@ def obtem_sequencia(tab, casa, direcao, tamanho):
     
     sequencia = ""
     for i in range(tamanho):
-        # Incrementa linha ou coluna conforme a direção escolhida
-        nova_casa = cria_casa(linha + (inc_linha * i), coluna + (inc_coluna * i))
+        # Incrementa linha ou coluna conforme a direção escolhida        
+        nova_linha = linha + (inc_linha * i)
+        nova_coluna = coluna + (inc_coluna * i)
+        
+        if not (1 <= nova_linha <= TAMANHO_DO_TABULEIRO 
+                and 1 <= nova_coluna <= TAMANHO_DO_TABULEIRO):
+            return ""
+
+        nova_casa = cria_casa(nova_linha, nova_coluna)
         sequencia += obtem_valor(tab, nova_casa)
 
     return sequencia
@@ -539,6 +545,8 @@ def joga_palavra(tab, palavra, casa, direcao ,conj_letras ,primeira):
             return ()
 
     padrao = obtem_sequencia(tab, casa, direcao, len(palavra))
+    if padrao == '':
+        return ()
 
     # se não for a primeira jogada, tem de tocar numa letra já posta no tabuleiro
     if not primeira:
@@ -591,6 +599,9 @@ def processa_jogada(tab, jog, pilha, pontos, primeira):
             continue
         jogada_recebida = jogada.split()
         
+        if len(jogada_recebida) == 0:
+            continue
+
         # Caso o jogador queira passar
         if jogada_recebida[0] == 'P':
             if len(jogada_recebida ) == 1:
