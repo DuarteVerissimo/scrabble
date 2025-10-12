@@ -8,10 +8,7 @@ NUM_MAX_JOGADORES = 4
 NUM_MIN_JOGADORES = 2
 TAMANHO_DO_TABULEIRO = 15
 
-
-
-class casa:
-    def cria_casa(lin, col):
+def cria_casa(lin, col):
         if (not type(lin) == int or not type(col) == int 
             or not 1 <= lin <= TAMANHO_DO_TABULEIRO 
             or not 1 <= col <= TAMANHO_DO_TABULEIRO):
@@ -19,35 +16,36 @@ class casa:
     
         return (lin, col)
     
-    def obtem_col(casa):
+def obtem_col(casa):
         lin, col = casa
         return col
     
-    def obtem_lin(casa):
+def obtem_lin(casa):
         lin, col = casa
         return lin
     
-    def eh_casa(arg):
+def eh_casa(arg):
         lin, col = arg
         return (type(lin) == int and type(col) == int 
         and 1 <= lin <= TAMANHO_DO_TABULEIRO 
         and 1 <= col <= TAMANHO_DO_TABULEIRO)
 
-    def casas_iguais(c1, c2):
+def casas_iguais(c1, c2):
         lin1, col1 = c1
         lin2, col2 = c2
 
         return lin1 == lin2 and col1 == col2
     
-    def casa_para_str(c):
-        return str(c)
+def casa_para_str(c):
+        l,c = c
+        return '(' + str(l) + ',' + str(c) + ')'
     
-    def str_para_casa(s):
+def str_para_casa(s):
         s = s.strip('()')
         lin, col = map(int, s.split(','))
-        return (lin, col)
+        return (lin,col)
 
-    def incrementa_casa(c, d, s):
+def incrementa_casa(c, d, s):
         lin, col = c
 
         
@@ -66,5 +64,4 @@ class casa:
         or not 1 <= nova_col <= TAMANHO_DO_TABULEIRO):
             return c    
         
-        return casa.cria_casa(nova_linha, nova_col)
-    
+        return cria_casa(nova_linha,nova_col)
