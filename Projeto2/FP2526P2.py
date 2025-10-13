@@ -13,16 +13,14 @@ def cria_casa(lin, col):
             or not 1 <= lin <= TAMANHO_DO_TABULEIRO 
             or not 1 <= col <= TAMANHO_DO_TABULEIRO):
             raise ValueError(f"cria_casa: argumentos inválidos")
-    
+
         return (lin, col)
     
 def obtem_col(casa):
-        lin, col = casa
-        return col
+        return casa[1]
     
 def obtem_lin(casa):
-        lin, col = casa
-        return lin
+        return casa[0]
     
 def eh_casa(arg):
         lin, col = arg
@@ -31,14 +29,10 @@ def eh_casa(arg):
         and 1 <= col <= TAMANHO_DO_TABULEIRO)
 
 def casas_iguais(c1, c2):
-        lin1, col1 = c1
-        lin2, col2 = c2
-
-        return lin1 == lin2 and col1 == col2
+        return c1[0] == c2[0] and c1[1] == c2[2]
     
 def casa_para_str(c):
-        l,c = c
-        return '(' + str(l) + ',' + str(c) + ')'
+        return '(' + str(c[0]) + ',' + str(c[1]) + ')'
     
 def str_para_casa(s):
         s = s.strip('()')
@@ -46,19 +40,18 @@ def str_para_casa(s):
         return (lin,col)
 
 def incrementa_casa(c, d, s):
-        lin, col = c
-
-        
         inc_lin = 0
         inc_col = 0
 
         if d == 'H':
             inc_col = s
-        if d == 'V':
+        elif d == 'V':
             inc_lin = s
+        else:
+               return c
 
-        nova_linha = lin + inc_lin
-        nova_col = col + inc_col
+        nova_linha = c[0] + inc_lin
+        nova_col = c[1] + inc_col
         
         if (not 1 <= nova_linha <= TAMANHO_DO_TABULEIRO 
         or not 1 <= nova_col <= TAMANHO_DO_TABULEIRO):
