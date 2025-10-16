@@ -3,6 +3,12 @@
 ABECEDARIO = ('A','B','C','Ç','D','E','F','G','H','I','J','L','M','N','O',
                   'P','Q','R','S','T','U','V','X','Z')
 
+pontos = {  'A':1, 'B': 3,'C': 2,'Ç':3, 'D':2, 'E':1,
+            'F':4, 'G': 4,'H': 4,'I': 1,'J': 5,'L': 2,
+            'M':1, 'N': 3,'O': 1,'P': 2,'Q': 6,'R': 1,
+            'S':1, 'T': 1,'U': 1,'V': 4,'X': 8,'Z': 8
+            }
+
 NUM_LETRAS_JOGADOR = 7
 NUM_MAX_JOGADORES = 4
 NUM_MIN_JOGADORES = 2
@@ -166,3 +172,37 @@ def distribui_letras(jog, saco, num):
             letra = saco.pop()
             recebe_letra(jog, letra)
     return jog
+
+# Construtor
+def cria_vocabulario(v):
+    if not isinstance(v, tuple) and not len(v) >= 1:
+        raise ValueError("cria_vocabulario: argumento inválido")
+    for palavra in v:
+        if not isinstance(palavra, str):
+            raise ValueError("cria_vocabulario: argumento inválido")
+        if not (2 <= len(palavra) <= TAMANHO_DO_TABULEIRO):
+            raise ValueError("cria_vocabulario: argumento inválido")
+        for i in range(len(palavra)):
+            if palavra[i] not in ABECEDARIO:
+                raise ValueError("cria_vocabulario: argumento inválido")
+    return list(v)
+
+# Seletores
+def obtem_pontos(vocabulario, palavra):
+    pontuacao = 0
+    if palavra in vocabulario:
+        for letra in palavra:
+            pontuacao += pontos[letra]      # Soma o valor de pontos da letra
+    return pontuacao
+
+def obtem_palavras(vocabulario, comp, letra):
+    res = []
+    for palavra in vocabulario:
+        if (len(palavra) == comp and palavra[0] == letra):
+            res.append((palavra, obtem_pontos(vocabulario, palavra)),)
+    
+    res.sort(key=lambda x: (-x[1], x[0]))
+    return res
+
+vocab = cria_vocabulario(('AULA', 'CAO', 'ASA', 'CEGO', 'CEGA', 'CONE', 'COÇA', 'VACA', 'CASA'))
+print(obtem_palavras(vocab, 4, 'C'))
