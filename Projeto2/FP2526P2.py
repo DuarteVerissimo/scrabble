@@ -16,6 +16,20 @@ TAMANHO_DO_TABULEIRO = 15
 
 # Construtores
 def cria_casa(lin, col):
+    """
+    Função que cria uma casa do tabuleiro e representa a num tuplo(linha, coluna)
+
+    Args:
+        l (int): linha do tabuleiro (1 a 15)
+        c (int): coluna do tabuleiro (1 a 15)
+
+    Returns:
+        tuplo: (l, c) representando a casa
+
+    Raise:
+        ValueError: se os números recebidos não forem inteiros
+                    se os números recebidos forem menores que 1 e maiores que 15
+    """
     if (not type(lin) == int or not type(col) == int 
         or not 1 <= lin <= TAMANHO_DO_TABULEIRO 
         or not 1 <= col <= TAMANHO_DO_TABULEIRO):
@@ -55,6 +69,9 @@ def str_para_casa(s):
 
 # Alto nível
 def incrementa_casa(c, d, s):
+    if not type(s) == int or s < 0:
+        return c
+
     inc_lin = 0
     inc_col = 0
 
@@ -336,3 +353,175 @@ def procura_palavra_padrao(vocabulario, padrao, letras, min_pontos):
                         melhor_pontuacao = pontuacao
         return (melhor_palavra, melhor_pontuacao)
     
+# TAD Tabuleiro
+# Construtor
+def cria_tabuleiro():
+    """"
+    Função que cria um tabuleiro vazio 15x15
+
+    Args:
+        Nenhum
+
+    Returns:
+        list: lista de 15 listas, cada uma com 15 elementos
+              onde cada casa livre é rrepresentada por "."
+    """
+    tab = []
+    
+    for _ in range(TAMANHO_DO_TABULEIRO):
+        linha = ['.'] * TAMANHO_DO_TABULEIRO
+        tab.append(linha)
+    
+    return tab
+
+# Seletores
+def obtem_letra(t, c):
+    """
+    Função que mostra a letra que está numa casa do tabuleiro
+
+    Args:
+        tab (list): tabuleiro 15x15
+        casa (tuple): (linha, coluna), entre 1 e 15
+
+    Returns:
+        str: letra ou se não estiver nenhuma letra nessa casa devolve uma string vazia
+    """
+    lin = obtem_lin(c)
+    col = obtem_col(c)
+    if t[lin - 1][col - 1] == '.':
+        return ''
+    else:
+        return t[lin - 1][col - 1]
+    
+def obtem_valor_aux(t, c):
+    """
+    Função auxiliar que mostra o valor que está numa casa do tabuleiro
+
+    Args:
+        tab (list): tabuleiro 15x15
+        casa (tuple): (linha, coluna), entre 1 e 15
+
+    Returns:
+        str: letra ou '.'
+    """
+    if obtem_letra(t, c) == '':
+        return '.'
+    else:
+        return obtem_letra(t, c)
+
+# Modificadores
+def insere_letra(t, c, l):
+    """
+    Função que insere uma letra numa casa do tabuleiro (modificando destrutivamente)
+
+    Args:
+        tab (list): tabuleiro 15x15
+        casa (tuple): (linha, coluna), entre 1 e 15
+        letra (str): letra a inserir
+
+    Returns:
+        list: tabuleiro modificado
+    """
+    lin = obtem_lin(c)
+    col = obtem_col(c)
+    t[lin - 1][col - 1] = l
+    return t
+
+# Reconhecedor
+def eh_tabuleiro(arg):
+    for i in range(1, TAMANHO_DO_TABULEIRO + 1):
+        for j in range(1, TAMANHO_DO_TABULEIRO + 1):
+            letra = obtem_letra(arg, cria_casa(i, j))
+            if letra not in ABECEDARIO:
+                return False
+            if letra == '' and obtem_valor_aux(arg, cria_casa(i, j)) != '.':
+                return False
+    return True
+
+def eh_tabuleiro_vazio(arg):
+    for i in range(1, TAMANHO_DO_TABULEIRO +1):
+        for j in range(1, TAMANHO_DO_TABULEIRO + 1):
+            if obtem_valor_aux(arg, cria_casa(i, j)) != '.':
+                return False
+    return True
+
+# Teste
+def tabuleiros_iguais(t1, t2):
+    return t1 == t2
+
+# Transformador
+def tabuleiro_para_str(tab):
+    """
+    Função que converte o tabuleiro numa representação string legível
+
+    Args:
+        tab (list): tabuleiro 15x15
+
+    Returns:
+        str: representação textual do tabuleiro
+    """
+    tabuleiro = []
+    
+    # Numeração das colunas
+    numeros_das_colunas1="                       1 1 1 1 1 1"
+    numeros_das_colunas2="     1 2 3 4 5 6 7 8 9 0 1 2 3 4 5"
+    
+    tabuleiro.append(numeros_das_colunas1)
+    tabuleiro.append(numeros_das_colunas2)
+    
+    # Linha superior da moldura
+    tabuleiro.append("   +" + "-" * 31 + "+")
+
+    # Cada linha do tabuleiro é constitiuda pelo número da linha e o conteúdo das células
+    for i in range(TAMANHO_DO_TABULEIRO):
+        if i + 1 < 10:
+            numeros_das_linhas = ' ' + str(i + 1)
+        
+        else:
+            numeros_das_linhas = str(i + 1)
+    
+        linha = numeros_das_linhas + " |"
+        
+        for j in range(TAMANHO_DO_TABULEIRO):
+            linha += " " + tab[i][j]
+        
+        linha += " |"
+        
+        tabuleiro.append(linha)
+    
+    # Linha inferior da moldura
+    tabuleiro.append("   +" + "-" * 31 + "+")
+
+    # Junta todas as linhas numa única string separada por quebras de linha
+    resultado=""
+    for k in range(len(tabuleiro)): 
+        if k < (len(tabuleiro) -1):
+            resultado += tabuleiro[k] + "\n"
+        else:
+            resultado += tabuleiro[k]
+    
+    return resultado
+
+# Alto-nível
+def obtem_padrao(tab, i, f):
+    padrao = ''
+    distancia = 0
+    direcao = none
+    linha_inicial, coluna_inicial = obtem_lin(i), obtem_col(i)
+    linha_final, coluna_final = obtem_lin(f), obtem_col(f)
+    if linha_inicial == linha_final:
+        direcao = 'H' 
+        distancia = coluna_final - coluna_inicial
+    elif coluna_inicial == coluna_final:
+        direcao = 'V' 
+        distancia = linha_final - linha_inicial
+    else:
+        pass
+
+    for d in range(0, distancia + 1):
+        nova_casa = incrementa_casa(i, direcao, d)
+        if obtem_letra(tab, nova_casa) == '':
+            padrao += '.'
+        else:
+            padrao += obtem_letra(tab, nova_casa)
+    return padrao
