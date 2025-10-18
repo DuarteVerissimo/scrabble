@@ -1,5 +1,8 @@
 #ist1117729
 
+from platform import node
+
+
 ABECEDARIO = ('A','B','C','Ç','D','E','F','G','H','I','J','L','M','N','O',
                   'P','Q','R','S','T','U','V','X','Z')
 
@@ -506,15 +509,13 @@ def tabuleiro_para_str(tab):
 def obtem_padrao(tab, i, f):
     padrao = ''
     distancia = 0
-    direcao = none
+    direcao = None
     linha_inicial, coluna_inicial = obtem_lin(i), obtem_col(i)
     linha_final, coluna_final = obtem_lin(f), obtem_col(f)
     if linha_inicial == linha_final:
-        direcao = 'H' 
-        distancia = coluna_final - coluna_inicial
+        direcao = 'H', distancia = coluna_final - coluna_inicial
     elif coluna_inicial == coluna_final:
-        direcao = 'V' 
-        distancia = linha_final - linha_inicial
+        direcao = 'V', distancia = linha_final - linha_inicial
     else:
         pass
 
