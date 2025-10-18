@@ -32,6 +32,8 @@ def obtem_lin(casa):
 
 # Reconhecedor  
 def eh_casa(arg):
+    if not isinstance(arg, tuple) or len(arg) != 2:
+        return False
     lin, col = arg
     return (type(lin) == int and type(col) == int 
     and 1 <= lin <= TAMANHO_DO_TABULEIRO 
@@ -79,7 +81,7 @@ def cria_humano(nome):
     return {'nome': nome, 'pontos': 0, 'letras':{}}
 
 def cria_agente(nivel):
-    if nivel not in ('FACIL' or 'MEDIO' or 'DIFICIL'):
+    if nivel not in ('FACIL', 'MEDIO', 'DIFICIL'):
         raise ValueError("cria_agente: argumento inválido")
     return {'nivel': nivel, 'pontos': 0, 'letras':{}}
 
@@ -99,7 +101,7 @@ def jogador_letras(j):
     for letra, occ in j['letras'].items():
         lista_letras.extend(letra * occ)
     
-    lista_letras = sorted(lista_letras, key = lambda x: ABECEDARIO.index(x))
+    lista_letras.sort(key=lambda x: ABECEDARIO.index(x))
     
     for i in range(len(lista_letras)):
         res += ' ' + lista_letras[i]
@@ -175,34 +177,162 @@ def distribui_letras(jog, saco, num):
 
 # Construtor
 def cria_vocabulario(v):
-    if not isinstance(v, tuple) and not len(v) >= 1:
+    if not isinstance(v, tuple) or not len(v) >= 1:
         raise ValueError("cria_vocabulario: argumento inválido")
+    vocabulario_final = {}
     for palavra in v:
         if not isinstance(palavra, str):
             raise ValueError("cria_vocabulario: argumento inválido")
+
         if not (2 <= len(palavra) <= TAMANHO_DO_TABULEIRO):
             raise ValueError("cria_vocabulario: argumento inválido")
+
         for i in range(len(palavra)):
             if palavra[i] not in ABECEDARIO:
                 raise ValueError("cria_vocabulario: argumento inválido")
-    return list(v)
+        
+        
+        comprimento = len(palavra)
+        letra_inicial = palavra[0] 
+        pontuacao = sum(pontos[letra] for letra in palavra)
+        chave = (comprimento, letra_inicial)
+        
+        
+        if chave not in vocabulario_final:
+            vocabulario_final[chave] = []
+        vocabulario_final[chave].append((palavra, pontuacao))
+    
+    for chave in vocabulario_final: 
+        vocabulario_final[chave] = sorted(vocabulario_final[chave], key = lambda x:(-x[1], [ABECEDARIO.index(letra) for letra in x[0]]))
+        vocabulario_final[chave] = tuple(vocabulario_final[chave])
+    
+    return vocabulario_final
 
 # Seletores
 def obtem_pontos(vocabulario, palavra):
-    pontuacao = 0
-    if palavra in vocabulario:
-        for letra in palavra:
-            pontuacao += pontos[letra]      # Soma o valor de pontos da letra
-    return pontuacao
+    chave = (len(palavra), palavra[0])
+    if chave in vocabulario:
+        # Percorre o tuplo de palavras para encontrar a correspondente
+        for p, pontuacao in vocabulario[chave]:
+            if p == palavra:
+                return pontuacao  # Retorna a pontuação pré-calculada
+    return 0  # Retorna 0 se a palavra não for encontrada
 
 def obtem_palavras(vocabulario, comp, letra):
-    res = []
-    for palavra in vocabulario:
-        if (len(palavra) == comp and palavra[0] == letra):
-            res.append((palavra, obtem_pontos(vocabulario, palavra)),)
-    
-    res.sort(key=lambda x: (-x[1], x[0]))
-    return res
+    chave = (comp, letra)
+    if chave not in vocabulario:
+        return ()
+    return vocabulario[chave]
 
-vocab = cria_vocabulario(('AULA', 'CAO', 'ASA', 'CEGO', 'CEGA', 'CONE', 'COÇA', 'VACA', 'CASA'))
-print(obtem_palavras(vocab, 4, 'C'))
+# Teste
+def testa_palavra_padrao(vocabulario, palavra, padrao, conj):
+    resultado = testa_palavra_padrao_auxiliar(vocabulario, palavra, padrao, conj)
+    return len(resultado) > 0
+
+def testa_palavra_padrao_auxiliar(vocabulario, palavra, padrao, conj):
+    if len(palavra) != len(padrao):
+        return []
+    
+    chave = (len(palavra), palavra[0])
+
+    if chave in vocabulario:
+        if not (any(p[0] == palavra for p in vocabulario[chave])):
+            return []
+    else:
+        return []
+
+    conjunto_letras = {}
+    for letra in conj:
+        if letra not in conjunto_letras:
+            conjunto_letras[letra] = 1
+        else:
+            conjunto_letras[letra] += 1
+
+    letras_usadas = []
+    for i in range(len(palavra)):
+        letra_palavra = palavra[i]
+        letra_padrao = padrao[i]
+        
+        if letra_padrao == '.': 
+            # Verificar se a letra está no cojunto e se existem occorrencias suficientes para usar
+            if letra_palavra not in conjunto_letras or conjunto_letras[letra_palavra] == 0:
+                return []
+
+            
+            conjunto_letras[letra_palavra] -= 1
+            letras_usadas.append(palavra[i])
+        else:
+            # Se o padrão tiver uma letra têm de coincidir com a letra da palavra
+            if letra_palavra != letra_padrao:
+                return []
+    
+    return letras_usadas
+
+def ficheiro_para_vocabulario(nome_fich):
+    """
+    Lê um ficheiro de texto e cria um TAD vocabulario com as palavras válidas.
+
+    A função processa um ficheiro com uma palavra por linha, ignora linhas
+    vazias, converte as palavras para maiúsculas e filtra-as de acordo
+    com as regras do projeto (comprimento 2-15, letras do abecedário
+    português).
+
+    Args:
+        nome_fich (str): O nome do ficheiro a ser lido.
+
+    Returns:
+        vocabulario: O TAD vocabulario criado com as palavras válidas.
+    """
+    palavras_validas = []
+    with open(nome_fich, 'r') as f:
+        for linha in f:
+            palavra = linha.strip().upper()
+            if 2 <= len(palavra) <= TAMANHO_DO_TABULEIRO and all(letra in ABECEDARIO for letra in palavra):
+                palavras_validas.append(palavra)
+            if not palavra:
+                continue
+            else:
+                continue
+    return cria_vocabulario(tuple(palavras_validas))
+
+def vocabulario_para_str(vocabulario):
+    palavras = []
+    for comprimento in range(2, TAMANHO_DO_TABULEIRO + 1):
+        for letra in ABECEDARIO:
+            chave = (comprimento, letra)
+            if chave in vocabulario:
+                tuplo_palavras = obtem_palavras(vocabulario, comprimento, letra)
+                for i in range(len(tuplo_palavras)):
+                    palavra = tuplo_palavras[i][0]
+                    palavras.append(palavra)
+    return '\n'.join(palavras)
+
+# Funcões de alto nível
+def procura_palavra_padrao(vocabulario, padrao, letras, min_pontos):
+    if padrao[0] != '.':
+        primeira_letra = padrao[0]
+        palavras_validas = obtem_palavras(vocabulario, len(padrao), primeira_letra)
+        for palavra, pontuacao in palavras_validas:
+            if pontuacao < min_pontos:
+                break
+            if testa_palavra_padrao(vocabulario, palavra, padrao, letras):
+                return(palavra, pontuacao)
+        return ('', 0)
+    else:
+        melhor_palavra = ''
+        melhor_pontuacao = 0
+        # Cria um conjunto de letras únicas disponíveis para a primeira posição.
+        possivel_primeira_letras = sorted(list(set(letras)), key=lambda x: ABECEDARIO.index(x))
+
+        # Itera sobre cada letra única como uma possível primeira letra.
+        for possivel_letra in possivel_primeira_letras:
+            palavras_validas = obtem_palavras(vocabulario, len(padrao), possivel_letra)
+            for palavra, pontuacao in palavras_validas:
+                if pontuacao < min_pontos:
+                    break
+                if testa_palavra_padrao(vocabulario, palavra, padrao, letras):
+                    if pontuacao > melhor_pontuacao:
+                        melhor_palavra = palavra
+                        melhor_pontuacao = pontuacao
+        return (melhor_palavra, melhor_pontuacao)
+    
