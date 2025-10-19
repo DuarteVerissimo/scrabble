@@ -1,8 +1,5 @@
 #ist1117729
 
-from platform import node
-
-
 ABECEDARIO = ('A','B','C','Ç','D','E','F','G','H','I','J','L','M','N','O',
                   'P','Q','R','S','T','U','V','X','Z')
 
@@ -513,9 +510,11 @@ def obtem_padrao(tab, i, f):
     linha_inicial, coluna_inicial = obtem_lin(i), obtem_col(i)
     linha_final, coluna_final = obtem_lin(f), obtem_col(f)
     if linha_inicial == linha_final:
-        direcao = 'H', distancia = coluna_final - coluna_inicial
+        direcao = 'H' 
+        distancia = coluna_final - coluna_inicial
     elif coluna_inicial == coluna_final:
-        direcao = 'V', distancia = linha_final - linha_inicial
+        direcao = 'V'
+        distancia = linha_final - linha_inicial
     else:
         pass
 
@@ -526,3 +525,120 @@ def obtem_padrao(tab, i, f):
         else:
             padrao += obtem_letra(tab, nova_casa)
     return padrao
+
+def insere_palavra(tab, casa, direcao, palavra):
+    """
+    Função que insere uma palavra no tabuleiro a partir de uma casa e direção,
+    modificando destrutivamente o tabuleiro
+
+    Args:
+        tab (list): tabuleiro 15x15
+        casa (tuple): (linha, coluna), entre 1 e 15
+        direcao (str): 'H' para horizontal ou 'V' para vertical
+        palavra (str): palavra a inserir
+
+    Returns:
+        list: tabuleiro modificado
+
+    Raise:
+        ValueError: se a palavra não couber dentro dos limites do tabuleiro
+                    se a direção for diferente de 'H' ou
+    """
+    linha = obtem_lin(casa)
+    coluna = obtem_col(casa)
+
+    if direcao == 'H' and coluna + len(palavra) - 1 > TAMANHO_DO_TABULEIRO:
+        raise ValueError("insere_palavra: argumentos inválidos")
+    if direcao == 'V' and linha + len(palavra) - 1 > TAMANHO_DO_TABULEIRO:
+        raise ValueError("insere_palavra: argumentos inválidos")
+
+    inc_linha = 0
+    inc_coluna = 0
+    
+    if direcao == 'H':
+        inc_coluna = 1
+    elif direcao == 'V':
+        inc_linha = 1
+    
+    for i in range(len(palavra)):
+        nova_casa = cria_casa(linha + inc_linha * i, coluna + inc_coluna * i)
+        tab = insere_letra(tab, nova_casa, palavra[i])
+    
+    return tab
+
+def obtem_subpadroes(tab, i, f, l):
+    # Determina a direção e obtem o padrão principal
+    direcao = 'H' if obtem_lin(i) == obtem_lin(f) else 'V'
+    padrao = obtem_padrao(tab, i, f)
+    
+    casas_inicias = []
+    sub_padroes = []
+
+    # Define o início do subpadrão(índice 'j')
+    for j in range(len(padrao)):
+        # Define o fim do subpadrão (índice `k`)
+        # Decresnte para começar nos padrões menores
+        for k in range(len(padrao), j, -1):
+            sub_padrao = padrao[j:k]
+            
+            espacos_livres = sub_padrao.count('.')   
+            tem_espaco = espacos_livres > 0
+            tem_letra = any(caractere != '.' for caractere in sub_padrao)
+            toca_letra_antes = False
+            toca_letra_depois = False
+            if j > 0:
+                if padrao[j - 1] != '.':
+                    toca_letra_antes = True
+            if k < len(padrao) :
+                if padrao[k] != '.':
+                    toca_letra_depois = True
+
+            if tem_letra and tem_espaco and espacos_livres <= l:
+                if not (toca_letra_antes or toca_letra_depois):
+                    sub_padroes.append(sub_padrao)
+                    casa_inicial = incrementa_casa(i, direcao, j)
+                    casas_inicias.append(casa_inicial)
+    return tuple(sub_padroes), tuple(casas_inicias)
+
+def gera_todos_padroes(tab, l):
+    todos_padroes = []
+    todas_casas = []
+    todas_direcoes = []
+
+    for linhas in range(1, TAMANHO_DO_TABULEIRO + 1):
+        casa_inicial_h = cria_casa(linhas, 1)
+        casa_final_h = cria_casa(linhas, TAMANHO_DO_TABULEIRO)
+        sub_padroes_h, casas_inicias_h = obtem_subpadroes(tab, casa_inicial_h, casa_final_h, l)
+        todos_padroes.extend(sub_padroes_h)
+        todas_casas.extend(casas_inicias_h)
+        todas_direcoes.extend(['H'] * len(sub_padroes_h))
+
+    for colunas in range(1, TAMANHO_DO_TABULEIRO + 1):
+        casa_inicial_v = cria_casa(1, colunas)
+        casa_final_v = cria_casa(TAMANHO_DO_TABULEIRO, colunas)
+        sub_padroes_v, casas_inicias_v = obtem_subpadroes(tab, casa_inicial_v, casa_final_v, l)
+        todos_padroes.extend(sub_padroes_v)
+        todas_casas.extend(casas_inicias_v)
+        todas_direcoes.extend(['V'] * len(sub_padroes_v))
+
+    return tuple(todos_padroes), tuple(todas_casas), tuple(todas_direcoes)
+
+
+def baralha_saco(estado):
+    def gera_numero_aleatorio(estado):
+        """
+        Função que gera um número pseudo-aleatório usando o algoritmo xorshift
+
+        Args:
+            estado (int): estado atual do gerador
+
+        Returns:
+            int: número pseudo-aleatório(novo estado do gerador)
+    """
+        # Algoritmo xorshift32 (32 bits)
+        estado ^= (estado << 13) & 0xFFFFFFFF
+        estado ^= (estado >> 17) & 0xFFFFFFFF
+        estado ^= (estado << 5) & 0xFFFFFFFF
+    
+        return estado 
+    
