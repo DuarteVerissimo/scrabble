@@ -240,7 +240,7 @@ def jogador_letras(j):
     lista_letras.sort(key=lambda x: ABECEDARIO.index(x))
     
     for i in range(len(lista_letras)):
-        res += ' ' + lista_letras[i]
+        res += lista_letras[i]
     
     return res
 
@@ -372,7 +372,7 @@ def jogador_para_str(j):
     if eh_agente(j):
         prefixo = 'BOT(' + str(jogador_identidade(j)) + ') (' + pontos + '):'
     
-    return prefixo + jogador_letras(j)
+    return prefixo + "".join([' ' + letra for letra in jogador_letras(j)])
 
 # Função de alto-nível
 def distribui_letras(jog, saco, num):
@@ -886,7 +886,7 @@ def jogada_humano(tab, jog, vocab, pilha):
     # Até as instruções serem válidas
     while True:
         # Recebe um input com as instruções do jogador
-        jogada = input("Jogada J" + str(jog['id']) + ": ")
+        jogada = input("Jogada " + str(jogador_identidade(jog)) + ": ")
         if '  'in jogada:
             continue
         jogada_recebida = jogada.split()
@@ -906,22 +906,10 @@ def jogada_humano(tab, jog, vocab, pilha):
 
         # Caso o jogador queira jogar uma palavra
         elif jogada_recebida[0] == 'J':
-            if jogar(tab, jog, pilha, jogada_recebida,):
+            if jogar(tab, jog, vocab, pilha, jogada_recebida):
                 return True
             
 def processa_troca(jogada_recebida, jog, pilha):
-    """
-    Função auxiliar que caso o jogador decida trocar as letras do seu conjunto('T'), troca as letras escolhidas
-    pelas as ultimas da pilha
-
-    Args:
-        jogada_recebida (list): lista que contem o input com as informações necessárias
-        jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
-        pilha (list): lista de letras disponíveis (saco)
-
-    Returns:
-        bool: retorna True caso a jogada seja válida e False caso seja inválida
-    """
     # Extrai as letras que o jogador deseja trocar
     letras_para_troca = jogada_recebida[1:]
     
@@ -936,30 +924,11 @@ def processa_troca(jogada_recebida, jog, pilha):
             
             # Distribui novas letras para o jogador
             recebe_letra(jog, pilha.pop())
-            
-            return True
+        return True
 
     return False
 
 def jogar(tab, jog, vocab, pilha, jogada_recebida):
-    """
-    Função auxiliar que caso o jogador decida jogar('J') e a jogada seja válida, insere a palavra no tabuleiro,
-    atualiza o conunto de letras do jogador e atualiza também a pontuação do jogador
-
-    Args:
-        tab (list): tabuleiro 15x15
-        jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
-        pilha (list): lista de letras disponíveis (saco)
-        jogada_recebida (list): lista que contem o input com as informações necessárias
-        primeira (bool): bool que identifica se é a primeira jogada
-
-    Returns:
-        bool: retorna True caso a jogada seja válida e False caso seja inválida
-    """
-    primeira = False
-    if eh_tabuleiro_vazio:
-        primeira = True
-    
     if len(jogada_recebida)<5:
         return False
 
@@ -969,22 +938,127 @@ def jogar(tab, jog, vocab, pilha, jogada_recebida):
     casa_inicial = cria_casa(linha, coluna)
     direcao = jogada_recebida[3]
     palavra = jogada_recebida[4]
+    casa_final = incrementa_casa(casa_inicial, direcao, len(palavra) - 1)
     
-    # Joga a palavra no tabueleiro devolvendo uma lista com as letras usadas
-    letras_usadas = 
-
-    if len(letras_usadas) == 0 :
+    if direcao not in ('H', 'V') or len(palavra) < 2:
         return False
     
-    # Atualiza o conjunto de letras do jogador
-    for l in letras_usadas:
-        jog['letras'][l] -=1
-        if jog['letras'][l] == 0:
-            del jog['letras'][l]
-        
-        distribui_letra(pilha, jog)
+    pontuacao = obtem_pontos(vocab, palavra)
+    if pontuacao == 0:
+        return False
+
+    if casas_iguais(casa_final, casa_inicial) and len(palavra) > 1:
+        return False
+    
+    padrao = obtem_padrao(tab, casa_inicial, casa_final)
+    letras_jogador = jogador_letras(jog)
+
+    if not testa_palavra_padrao(vocab, palavra, padrao, letras_jogador):
+        return False
+    
+    primeira = eh_tabuleiro_vazio(tab)
+    if primeira:
+        centro = cria_casa(8, 8)
+        toca_centro = False
+        for i in range(len(palavra)):
+            if casas_iguais(centro, incrementa_casa(casa_inicial, direcao, i)):
+                toca_centro = True
+                break
+        if not toca_centro:
+            return False
+    else:
+        if all(c == '.' for c in padrao):
+            return False
+
+
+    contar_letras_usadas = 0
+    for i in range(len(palavra)):
+        if padrao[i] == '.':
+            usa_letra(jog, palavra[i])
+            contar_letras_usadas += 1
+    
+    insere_palavra(tab, casa_inicial, direcao, palavra)
+
+    # Atualiza o conjunto de letras do jogador    
+    distribui_letras(jog, pilha, contar_letras_usadas)
 
     # Atualiza a pontuação do jogador
-    soma_pontos(jog, obtem_pontos(vocab, palavra))
+    soma_pontos(jog, pontuacao)
     
     return True
+
+def jogada_agente(tab, jog, vocab, pilha):
+    nivel = jogador_identidade(jog)
+    letras_agente = jogador_letras(jog)
+    numero_letras = len(letras_agente)
+
+    if eh_tabuleiro_vazio(tab):
+        print('Jogada ' + str(nivel) + ': P') 
+        return False
+    
+    # Tentajogar
+    (sub_padroes, casas_inicias, direcoes) = gera_todos_padroes(tab, numero_letras)
+
+    if nivel == 'FACIL':
+        N = 100
+    elif nivel == 'MEDIO':
+        N = 50
+    else:
+        N = 10
+    
+    sub_padroes_slicing = sub_padroes[::N]
+    casas_inicias_slicing = casas_inicias[::N]
+    direcoes_slicing = direcoes[::N]
+    
+    melhor_palavra = ''
+    melhor_pontuacao = -1
+    jogada_final = ()
+    padrao_atual = ''
+
+    for i in range(len(sub_padroes_slicing)):
+        padrao_atual = sub_padroes_slicing[i]
+        
+        palavra, pontuacao = procura_palavra_padrao(vocab, padrao_atual, letras_agente, 0)
+        
+        if pontuacao > melhor_pontuacao:
+            melhor_palavra = palavra
+            melhor_pontuacao = pontuacao
+        
+            jogada_final = (melhor_palavra, melhor_pontuacao, casas_inicias_slicing[i], direcoes_slicing[i], padrao_atual)
+    
+    if jogada_final != ():
+        print('Jogada ' + str(nivel) + ': J '+ str(obtem_lin(jogada_final[2])) + ' ' 
+              + str(obtem_col(jogada_final[2])) + ' ' + jogada_final[3] + ' ' + jogada_final[0])
+        palavra = jogada_final[0]
+        
+        contar_letras_usadas = 0
+        for i in range(len(palavra)):
+            if jogada_final[4][i] == '.':
+                usa_letra(jog, palavra[i])
+                contar_letras_usadas += 1
+    
+        insere_palavra(tab, jogada_final[2], jogada_final[3], palavra)
+
+        # Atualiza o conjunto de letras do jogador    
+        distribui_letras(jog, pilha, contar_letras_usadas)
+
+        # Atualiza a pontuação do jogador
+        soma_pontos(jog, jogada_final[1])
+        
+        return True
+    
+    # Trocar
+    elif jogada_final == () and len(pilha) >= 7:
+        numero_letras_para_trocar = len(letras_agente)
+
+        for l in letras_agente:
+            usa_letra(jog, l)
+        
+        distribui_letras(jog, pilha, numero_letras_para_trocar)
+        print('Jogada ' + str(nivel) + ': T ' + ' '.join(letras_agente))
+        return True
+        
+    # Passar
+    else:
+        print('Jogada ' + str(nivel) + ': P')
+        return False
