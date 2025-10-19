@@ -18,14 +18,14 @@ TAMANHO_DO_TABULEIRO = 15
 # Construtores
 def cria_casa(lin, col):
     """
-    Função que cria uma casa do tabuleiro e representa a num tuplo(linha, coluna)
-
+    Recebe 2 inteiros e devolve a casa correspondente no tabueliro
+    
     Args:
-        l (int): linha do tabuleiro (1 a 15)
-        c (int): coluna do tabuleiro (1 a 15)
+        lin (int): linha do tabuleiro (1 a 15)
+        col (int): coluna do tabuleiro (1 a 15)
 
     Returns:
-        tuplo: (l, c) representando a casa
+        casa: O TAD casa
 
     Raise:
         ValueError: se os números recebidos não forem inteiros
@@ -40,13 +40,40 @@ def cria_casa(lin, col):
 
 # Seletores  
 def obtem_col(casa):
+    """
+    Devolve a coluna de uma casa
+
+    Args:
+        c (casa): O TAD casa
+
+    Returns:
+        int: número da coluna
+    """
     return casa[1]
     
 def obtem_lin(casa):
+    """
+    Devolve a linha de uma casa
+
+    Args:
+        c (casa): O TAD casa
+
+    Returns:
+        int: número da linha
+    """
     return casa[0]
 
 # Reconhecedor  
 def eh_casa(arg):
+    """
+    Verifica se o argumento é um TAD casa válido
+
+    Args:
+        arg (universal): O argumento a verificar
+
+    Returns:
+        bool: True se o argumento for um TAD casa, False caso contrário
+    """
     if not isinstance(arg, tuple) or len(arg) != 2:
         return False
     lin, col = arg
@@ -56,20 +83,59 @@ def eh_casa(arg):
 
 # Teste
 def casas_iguais(c1, c2):
+    """
+    Verifica se duas casas são iguais
+
+    Args:
+        c1 (universal): O primeiro argumento
+        c2 (universal): O segundo argumento
+
+    Returns:
+        bool: True se as casas forem iguais, False caso contrário
+    """
     return (obtem_lin(c1) == obtem_lin(c2) 
             and obtem_col(c1) == obtem_col(c2))
 
 # Transformador
 def casa_para_str(c):
+    """
+    Converte um TAD casa para uma representação em string
+
+    Args:
+        c (casa): O TAD casa a converter
+
+    Returns:
+        str: representação da casa como string
+    """
     return '(' + str(obtem_lin(c)) + ',' + str(obtem_col(c)) + ')'
     
 def str_para_casa(s):
+    """
+    Converte uma string para um TAD casa
+
+    Args:
+        s (str): string que representa a casa
+
+    Returns:
+        casa: o TAD casa correspondente
+    """
     s = s.strip('()')
     lin, col = map(int, s.split(','))
     return cria_casa(lin, col)
 
 # Função de alto nível
 def incrementa_casa(c, d, s):
+    """
+    Incrementa uma casa numa dada direção e numa dada distância
+
+    Args:
+        c (casa): O TAD casa inicial
+        d (str): A direção ('H' para horizontal, 'V' para vertical)
+        s (int): A distância a incrementar
+
+    Returns:
+        casa: O novo TAD casa, ou o original se a nova posição for inválida
+    """
     if not type(s) == int or s < 0:
         return c
 
@@ -92,28 +158,80 @@ def incrementa_casa(c, d, s):
         
     return cria_casa(nova_linha, nova_col)
 
+# TAD jogador
 # Construtores
 def cria_humano(nome):
+    """
+    Cria um jogador humano
+
+    Args:
+        nome (str): O nome para o jogador
+
+    Returns:
+        jogador: O TAD que representa o jogador humano
+
+    Raises:
+        ValueError: Se o nome não for uma string não vazia
+    """
     if type(nome) != str or nome == "":
         raise ValueError("cria_humano: argumento inválido")
     return {'nome': nome, 'pontos': 0, 'letras':{}}
 
 def cria_agente(nivel):
+    """
+    Cria um jogador agente
+
+    Args:
+        nivel (str): O nível de dificuldade do bot
+
+    Returns:
+        jogador: O TAD que representa o jogador agente
+
+    Raises:
+        ValueError: Se o nível for inválido
+    """
     if nivel not in ('FACIL', 'MEDIO', 'DIFICIL'):
         raise ValueError("cria_agente: argumento inválido")
     return {'nivel': nivel, 'pontos': 0, 'letras':{}}
 
 # Seletores
 def jogador_identidade(j):
+    """
+    Devolve a identidade de um jogador, ou seja, nome para humano e nível para agente
+
+    Args:
+        j (jogador): O TAD jogador
+
+    Returns:
+        str: O nome ou o nível do jogador
+    """
     if 'nome' in j:
         return j['nome']
     else:
         return  j['nivel']
     
 def jogador_pontos(j):
+    """
+    Devolve os pontos de um jogador
+
+    Args:
+        j (jogador): O TAD jogador
+
+    Returns:
+        int: A pontuação do jogador
+    """
     return j['pontos']
 
 def jogador_letras(j):
+    """
+    Devolve uma string com as letras de um jogador, ordenadas alfabeticamente
+
+    Args:
+        j (jogador): O TAD jogador
+
+    Returns:
+        str: Uma string com as letras do jogador
+    """
     lista_letras = []
     res = ''
     for letra, occ in j['letras'].items():
@@ -128,6 +246,16 @@ def jogador_letras(j):
 
 # Modificadores
 def recebe_letra(j, l):
+    """
+    Adiciona uma letra as letras do jogador (modifica destrutivamente)
+
+    Args:
+        j (jogador): O TAD jogador
+        l (str): A letra a ser adicionada
+
+    Returns:
+        jogador: O TAD jogador modificado
+    """
     if l in j['letras']:
         j['letras'][l] += 1
     else:
@@ -135,6 +263,16 @@ def recebe_letra(j, l):
     return j
 
 def usa_letra(j, l):
+    """
+    Remove uma letra das letras do jogador (modifica destrutivamente)
+
+    Args:
+        j (jogador): O TAD jogador
+        l (str): A letra a ser removida
+
+    Returns:
+        jogador: O TAD jogador modificado
+    """
     if l in j['letras']:
         j['letras'][l] -= 1
         if j['letras'][l] <= 0:
@@ -144,28 +282,83 @@ def usa_letra(j, l):
         return j
     
 def soma_pontos(j, p):
+    """
+    Adiciona pontos à pontuação do jogador (modifica destrutivamente)
+
+    Args:
+        j (jogador): O TAD jogador
+        p (int): Os pontos a serem adicionados
+
+    Returns:
+        jogador: O TAD jogador modificado
+    """
     j['pontos'] += p
     return j
 
 # Reconhecedor
 def eh_jogador(arg):
+    """
+    Verifica se o argumento é um TAD jogador válido
+
+    Args:
+        arg (universal): O argumento a ser verificado
+
+    Returns:
+        bool: True se for um jogador, False caso contrário
+    """
     return ('nome' in arg or 'nivel' in arg)
 
 def eh_humano(arg):
+    """
+    Verifica se o argumento é um TAD jogador humano
+
+    Args:
+        arg (universal): O argumento a ser verificado
+
+    Returns:
+        bool: True se for um jogador humano, False caso contrário
+    """
     return 'nome' in arg
 
 def eh_agente(arg):
+    """
+    Verifica se o argumento é um TAD jogador agente
+
+    Args:
+        arg (universal): O argumento a ser verificado
+
+    Returns:
+        bool: True se for um jogador agente, False caso contrário
+    """
     return 'nivel' in arg
 
 # Teste
 def jogadores_iguais(j1, j2):
+    """
+    Verifica se dois jogadores são iguais
+
+    Args:
+        j1 (jogador): O primeiro TAD jogador
+        j2 (jogador): O segundo TAD jogador
+
+    Returns:
+        bool: True se os jogadores forem iguais, False caso contrário
+    """
     return ((jogador_identidade(j1) == jogador_identidade(j2))
             and jogador_pontos(j1) == jogador_pontos(j2)
             and jogador_letras(j1) == jogador_letras(j2))
 
 # Transformador
 def jogador_para_str(j):
-    
+    """
+    Converte um TAD jogador para a sua representação em string
+
+    Args:
+        j (jogador): O TAD jogador
+
+    Returns:
+        str: A representação do jogador como string
+    """
     # Formata a pontuação para ter sempre 3 espaços
     if jogador_pontos(j) < 10:
             pontos = "  " + str(jogador_pontos(j))
@@ -183,6 +376,17 @@ def jogador_para_str(j):
 
 # Função de alto-nível
 def distribui_letras(jog, saco, num):
+    """
+    Distribui um número de letras do saco para a mão de um jogador
+
+    Args:
+        jog (jogador): O TAD jogador
+        saco (list): A lista de letras disponíveis (pilha)
+        num (int): O número de letras a distribuir
+
+    Returns:
+        jogador: O TAD jogador modificado
+    """
     if num <= len(saco):
         for _ in range(num):
             letra = saco.pop()
@@ -358,7 +562,7 @@ def procura_palavra_padrao(vocabulario, padrao, letras, min_pontos):
 # Construtor
 def cria_tabuleiro():
     """"
-    Função que cria um tabuleiro vazio 15x15
+    cria um tabuleiro vazio 15x15
 
     Args:
         Nenhum
@@ -378,7 +582,7 @@ def cria_tabuleiro():
 # Seletores
 def obtem_letra(t, c):
     """
-    Função que mostra a letra que está numa casa do tabuleiro
+    mostra a letra que está numa casa do tabuleiro
 
     Args:
         tab (list): tabuleiro 15x15
@@ -413,7 +617,7 @@ def obtem_valor_aux(t, c):
 # Modificadores
 def insere_letra(t, c, l):
     """
-    Função que insere uma letra numa casa do tabuleiro (modificando destrutivamente)
+    insere uma letra numa casa do tabuleiro (modificando destrutivamente)
 
     Args:
         tab (list): tabuleiro 15x15
@@ -453,7 +657,7 @@ def tabuleiros_iguais(t1, t2):
 # Transformador
 def tabuleiro_para_str(tab):
     """
-    Função que converte o tabuleiro numa representação string legível
+    converte o tabuleiro numa representação string legível
 
     Args:
         tab (list): tabuleiro 15x15
@@ -529,7 +733,7 @@ def obtem_padrao(tab, i, f):
 
 def insere_palavra(tab, casa, direcao, palavra):
     """
-    Função que insere uma palavra no tabuleiro a partir de uma casa e direção,
+    insere uma palavra no tabuleiro a partir de uma casa e direção,
     modificando destrutivamente o tabuleiro
 
     Args:
@@ -626,7 +830,7 @@ def gera_todos_padroes(tab, l):
     
 def gera_numero_aleatorio(estado):
     """
-    Função que gera um número pseudo-aleatório usando o algoritmo xorshift
+    gera um número pseudo-aleatório usando o algoritmo xorshift
 
     Args:
         estado (int): estado atual do gerador
@@ -643,7 +847,7 @@ def gera_numero_aleatorio(estado):
 
 def permuta_letras(letras, estado):
     """
-    Função que altera a ordem das letras na lista, destrutivamente usando
+    altera a ordem das letras na lista, destrutivamente usando
     o gerador de números aleatórios
 
     Args:
