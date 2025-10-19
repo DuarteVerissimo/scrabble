@@ -14,6 +14,7 @@ NUM_MAX_JOGADORES = 4
 NUM_MIN_JOGADORES = 2
 TAMANHO_DO_TABULEIRO = 15
 
+# TAD Casa
 # Construtores
 def cria_casa(lin, col):
     """
@@ -67,7 +68,7 @@ def str_para_casa(s):
     lin, col = map(int, s.split(','))
     return cria_casa(lin, col)
 
-# Alto nível
+# Função de alto nível
 def incrementa_casa(c, d, s):
     if not type(s) == int or s < 0:
         return c
@@ -93,7 +94,7 @@ def incrementa_casa(c, d, s):
 
 # Construtores
 def cria_humano(nome):
-    if nome == "":
+    if type(nome) != str or nome == "":
         raise ValueError("cria_humano: argumento inválido")
     return {'nome': nome, 'pontos': 0, 'letras':{}}
 
@@ -173,14 +174,14 @@ def jogador_para_str(j):
     else:
             pontos = str(jogador_pontos(j))
     
-    if 'nome' in j:
+    if eh_jogador(j):
         prefixo = str(jogador_identidade(j)) + ' (' + pontos + '):'
-    else:
+    if eh_agente(j):
         prefixo = 'BOT(' + str(jogador_identidade(j)) + ') (' + pontos + '):'
     
     return prefixo + jogador_letras(j)
 
-# Alto-nível
+# Função de alto-nível
 def distribui_letras(jog, saco, num):
     if num <= len(saco):
         for _ in range(num):
@@ -502,7 +503,7 @@ def tabuleiro_para_str(tab):
     
     return resultado
 
-# Alto-nível
+# Funções de alto-nível
 def obtem_padrao(tab, i, f):
     padrao = ''
     distancia = 0
@@ -622,23 +623,164 @@ def gera_todos_padroes(tab, l):
         todas_direcoes.extend(['V'] * len(sub_padroes_v))
 
     return tuple(todos_padroes), tuple(todas_casas), tuple(todas_direcoes)
-
-
-def baralha_saco(estado):
-    def gera_numero_aleatorio(estado):
-        """
-        Função que gera um número pseudo-aleatório usando o algoritmo xorshift
-
-        Args:
-            estado (int): estado atual do gerador
-
-        Returns:
-            int: número pseudo-aleatório(novo estado do gerador)
+    
+def gera_numero_aleatorio(estado):
     """
-        # Algoritmo xorshift32 (32 bits)
-        estado ^= (estado << 13) & 0xFFFFFFFF
-        estado ^= (estado >> 17) & 0xFFFFFFFF
-        estado ^= (estado << 5) & 0xFFFFFFFF
+    Função que gera um número pseudo-aleatório usando o algoritmo xorshift
+
+    Args:
+        estado (int): estado atual do gerador
+
+    Returns:
+        int: número pseudo-aleatório(novo estado do gerador)
+    """
+    # Algoritmo xorshift32 (32 bits)
+    estado ^= (estado << 13) & 0xFFFFFFFF
+    estado ^= (estado >> 17) & 0xFFFFFFFF
+    estado ^= (estado << 5) & 0xFFFFFFFF
+
+    return estado
+
+def permuta_letras(letras, estado):
+    """
+    Função que altera a ordem das letras na lista, destrutivamente usando
+    o gerador de números aleatórios
+
+    Args:
+        letras (list): lista de letras (strings de 1 caractere)
+        estado (int): estado inicial do gerador de numeros aleatórios
+
+    Returns:
+        não retorna nada, alterando destrutivamente o argumento letras
+    """
+    n = len(letras)
+    for i in range(n - 1, 0, -1):
+        estado = gera_numero_aleatorio(estado)
+        j = estado % (i + 1)
+        letras[i], letras[j] = letras[j], letras[i]
+        
+def baralha_saco(estado):
+    saco = {
+            'A':14, 'B': 3,'C': 4,'Ç':2, 'D':5, 'E':11,
+            'F':2, 'G': 2,'H': 2,'I': 10,'J': 2,'L': 5,
+            'M':6, 'N': 4,'O': 10,'P': 4,'Q': 1,'R': 6,
+            'S':8, 'T': 5,'U': 7,'V': 2,'X': 1,'Z': 1}
     
-        return estado 
+    lista_letras = []
+        
+    # Ordenar pela ordem alfabética
+    for letra in saco:
+            lista_letras.extend([letra] * saco[letra])
     
+    lista_letras.sort(key=lambda x: ABECEDARIO.index(x))
+
+    permuta_letras(lista_letras, estado)
+        
+    return lista_letras
+
+def jogada_humano(tab, jog, vocab, pilha):
+    # Até as instruções serem válidas
+    while True:
+        # Recebe um input com as instruções do jogador
+        jogada = input("Jogada J" + str(jog['id']) + ": ")
+        if '  'in jogada:
+            continue
+        jogada_recebida = jogada.split()
+        
+        if len(jogada_recebida) == 0:
+            continue
+
+        # Caso o jogador queira passar
+        if jogada_recebida[0] == 'P':
+            if len(jogada_recebida) == 1:
+                return False
+
+        # Caso o jogador queira trocar letras
+        elif jogada_recebida[0] == 'T':
+            if processa_troca(jogada_recebida, jog, pilha):
+                return True
+
+        # Caso o jogador queira jogar uma palavra
+        elif jogada_recebida[0] == 'J':
+            if jogar(tab, jog, pilha, jogada_recebida,):
+                return True
+            
+def processa_troca(jogada_recebida, jog, pilha):
+    """
+    Função auxiliar que caso o jogador decida trocar as letras do seu conjunto('T'), troca as letras escolhidas
+    pelas as ultimas da pilha
+
+    Args:
+        jogada_recebida (list): lista que contem o input com as informações necessárias
+        jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
+        pilha (list): lista de letras disponíveis (saco)
+
+    Returns:
+        bool: retorna True caso a jogada seja válida e False caso seja inválida
+    """
+    # Extrai as letras que o jogador deseja trocar
+    letras_para_troca = jogada_recebida[1:]
+    
+    for letra in letras_para_troca:
+        if letra not in jogador_letras(jog) or jogador_letras(jog).count(letra) < letras_para_troca.count(letra):
+            return False
+    
+    if len(pilha) >= 7:
+        for l in letras_para_troca:
+            # Remove as letras que o jogador quer trocar
+            usa_letra(jog, l)
+            
+            # Distribui novas letras para o jogador
+            recebe_letra(jog, pilha.pop())
+            
+            return True
+
+    return False
+
+def jogar(tab, jog, vocab, pilha, jogada_recebida):
+    """
+    Função auxiliar que caso o jogador decida jogar('J') e a jogada seja válida, insere a palavra no tabuleiro,
+    atualiza o conunto de letras do jogador e atualiza também a pontuação do jogador
+
+    Args:
+        tab (list): tabuleiro 15x15
+        jog (dict): dicionário que representa o jogador {'id', 'pontos', 'letras'}
+        pilha (list): lista de letras disponíveis (saco)
+        jogada_recebida (list): lista que contem o input com as informações necessárias
+        primeira (bool): bool que identifica se é a primeira jogada
+
+    Returns:
+        bool: retorna True caso a jogada seja válida e False caso seja inválida
+    """
+    primeira = False
+    if eh_tabuleiro_vazio:
+        primeira = True
+    
+    if len(jogada_recebida)<5:
+        return False
+
+    # Extrai as informações para jogar
+    linha = int(jogada_recebida[1])
+    coluna = int(jogada_recebida[2])
+    casa_inicial = cria_casa(linha, coluna)
+    direcao = jogada_recebida[3]
+    palavra = jogada_recebida[4]
+    
+    # Joga a palavra no tabueleiro devolvendo uma lista com as letras usadas
+    letras_usadas = 
+
+    if len(letras_usadas) == 0 :
+        return False
+    
+    # Atualiza o conjunto de letras do jogador
+    for l in letras_usadas:
+        jog['letras'][l] -=1
+        if jog['letras'][l] == 0:
+            del jog['letras'][l]
+        
+        distribui_letra(pilha, jog)
+
+    # Atualiza a pontuação do jogador
+    soma_pontos(jog, obtem_pontos(vocab, palavra))
+    
+    return True
