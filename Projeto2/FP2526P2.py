@@ -448,47 +448,33 @@ def obtem_palavras(vocabulario, comp, letra):
 
 # Teste
 def testa_palavra_padrao(vocabulario, palavra, padrao, conj):
-    resultado = testa_palavra_padrao_auxiliar(vocabulario, palavra, padrao, conj)
-    return len(resultado) > 0
-
-def testa_palavra_padrao_auxiliar(vocabulario, palavra, padrao, conj):
-    if len(palavra) != len(padrao):
-        return []
+    if len(palavra) != len(padrao) or obtem_pontos(vocabulario, palavra) == 0:
+        return False
     
-    chave = (len(palavra), palavra[0])
-
-    if chave in vocabulario:
-        if not (any(p[0] == palavra for p in vocabulario[chave])):
-            return []
-    else:
-        return []
-
-    conjunto_letras = {}
+    letras_disponiveis = {}
     for letra in conj:
-        if letra not in conjunto_letras:
-            conjunto_letras[letra] = 1
+        if letra not in letras_disponiveis:
+            letras_disponiveis[letra] = 1
         else:
-            conjunto_letras[letra] += 1
+            letras_disponiveis[letra] += 1
 
-    letras_usadas = []
     for i in range(len(palavra)):
         letra_palavra = palavra[i]
         letra_padrao = padrao[i]
         
         if letra_padrao == '.': 
-            # Verificar se a letra está no cojunto e se existem occorrencias suficientes para usar
-            if letra_palavra not in conjunto_letras or conjunto_letras[letra_palavra] == 0:
-                return []
+            # Verificar se a letra está no cojunto de letras disponiveis 
+            # e se existem occorrencias suficientes para usar
+            if letra_palavra not in letras_disponiveis or letras_disponiveis[letra_palavra] == 0:
+                return False
+            letras_disponiveis[letra_palavra] -= 1
 
-            
-            conjunto_letras[letra_palavra] -= 1
-            letras_usadas.append(palavra[i])
         else:
             # Se o padrão tiver uma letra têm de coincidir com a letra da palavra
             if letra_palavra != letra_padrao:
-                return []
+                return False
     
-    return letras_usadas
+    return True
 
 def ficheiro_para_vocabulario(nome_fich):
     """
@@ -1024,38 +1010,40 @@ def jogada_agente(tab, jog, vocab, pilha):
             melhor_palavra = palavra
             melhor_pontuacao = pontuacao
         
-            jogada_final = (melhor_palavra, melhor_pontuacao, casas_inicias_slicing[i], direcoes_slicing[i], padrao_atual)
+            if melhor_palavra == '' and melhor_pontuacao == 0:
+                jogada_final = ()
+            else:
+                jogada_final = (melhor_palavra, melhor_pontuacao, casas_inicias_slicing[i], direcoes_slicing[i], padrao_atual)
     
-    if jogada_final != ():
-        print('Jogada ' + str(nivel) + ': J '+ str(obtem_lin(jogada_final[2])) + ' ' 
-              + str(obtem_col(jogada_final[2])) + ' ' + jogada_final[3] + ' ' + jogada_final[0])
-        palavra = jogada_final[0]
+    if jogada_final != ():    
+            print('Jogada ' + str(nivel) + ': J '+ str(obtem_lin(jogada_final[2])) + ' ' 
+                + str(obtem_col(jogada_final[2])) + ' ' + jogada_final[3] + ' ' + jogada_final[0])
+            palavra = jogada_final[0]
+            
+            contar_letras_usadas = 0
+            for i in range(len(palavra)):
+                if jogada_final[4][i] == '.':
+                    usa_letra(jog, palavra[i])
+                    contar_letras_usadas += 1
         
-        contar_letras_usadas = 0
-        for i in range(len(palavra)):
-            if jogada_final[4][i] == '.':
-                usa_letra(jog, palavra[i])
-                contar_letras_usadas += 1
-    
-        insere_palavra(tab, jogada_final[2], jogada_final[3], palavra)
+            insere_palavra(tab, jogada_final[2], jogada_final[3], palavra)
 
-        # Atualiza o conjunto de letras do jogador    
-        distribui_letras(jog, pilha, contar_letras_usadas)
+            # Atualiza o conjunto de letras do jogador    
+            distribui_letras(jog, pilha, contar_letras_usadas)
 
-        # Atualiza a pontuação do jogador
-        soma_pontos(jog, jogada_final[1])
-        
-        return True
+            # Atualiza a pontuação do jogador
+            soma_pontos(jog, jogada_final[1])
+            
+            return True
     
     # Trocar
-    elif jogada_final == () and len(pilha) >= 7:
-        numero_letras_para_trocar = len(letras_agente)
-
+    elif jogada_final == () and len(pilha) >= 7 :
+        letras_a_trocar = list(letras_agente)
         for l in letras_agente:
             usa_letra(jog, l)
         
-        distribui_letras(jog, pilha, numero_letras_para_trocar)
-        print('Jogada ' + str(nivel) + ': T ' + ' '.join(letras_agente))
+        distribui_letras(jog, pilha, len(letras_a_trocar))
+        print('Jogada ' + str(nivel) + ': T ' + ' '.join(letras_a_trocar))
         return True
         
     # Passar
