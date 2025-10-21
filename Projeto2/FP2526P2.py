@@ -540,7 +540,7 @@ def ficheiro_para_vocabulario(nome_fich):
         vocabulario: o TAD vocabulario criado a partir do ficheiro
     """
     palavras_validas = []
-    with open(nome_fich, 'r') as f:
+    with open(nome_fich, 'r', encoding='utf-8') as f:
         for linha in f:
             palavra = linha.strip().upper()
             if 2 <= len(palavra) <= TAMANHO_DO_TABULEIRO and all(letra in ABECEDARIO for letra in palavra):
@@ -1250,7 +1250,7 @@ def jogada_agente(tab, jog, vocab, pilha):
   
 def scrabble2(jogadores, nome_fich, estado):
     """
-    Função principal que corre o jogo Scrabble2
+    Função principal que corre o jogo Scrabble2 com 2 a 4 jogadores humanos ou agentes
 
     Args:
         jogadores (tuple): um tuplo com os nomes dos jogadores (humanos ou agentes)
@@ -1321,6 +1321,3 @@ def scrabble2(jogadores, nome_fich, estado):
             indice_jogador_atual += 1
 
     return tuple(jogador_pontos(jog) for jog in lista_de_jogadores)
-
-#jog = ('Maria', '@MEDIO','@DIFICIL', )
-#scrabble2(jog, 'vocab25k.txt',32)
