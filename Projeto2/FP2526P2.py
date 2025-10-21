@@ -1,7 +1,10 @@
 #ist1117729
 
-ABECEDARIO = ('A','B','C','Ç','D','E','F','G','H','I','J','L','M','N','O',
-                  'P','Q','R','S','T','U','V','X','Z')
+ABECEDARIO = {
+    'A': 1, 'B': 2, 'C': 3, 'Ç': 4, 'D': 5, 'E': 6, 'F': 7, 'G': 8, 'H': 9, 
+    'I': 10, 'J': 11, 'L': 12, 'M': 13, 'N': 14, 'O': 15, 'P': 16, 'Q': 17, 
+    'R': 18, 'S': 19, 'T': 20, 'U': 21, 'V': 22, 'X': 23, 'Z': 24
+    }
 
 pontos = {  'A':1, 'B': 3,'C': 2,'Ç':3, 'D':2, 'E':1,
             'F':4, 'G': 4,'H': 4,'I': 1,'J': 5,'L': 2,
@@ -237,7 +240,7 @@ def jogador_letras(j):
     for letra, occ in j['letras'].items():
         lista_letras.extend(letra * occ)
     
-    lista_letras.sort(key=lambda x: ABECEDARIO.index(x))
+    lista_letras.sort(key=lambda x: ABECEDARIO[x])
     
     for i in range(len(lista_letras)):
         res += lista_letras[i]
@@ -425,9 +428,8 @@ def cria_vocabulario(v):
         vocabulario_final[chave].append((palavra, pontuacao))
     
     for chave in vocabulario_final: 
-        vocabulario_final[chave] = sorted(vocabulario_final[chave], key = lambda x:(-x[1], [ABECEDARIO.index(letra) for letra in x[0]]))
+        vocabulario_final[chave] = sorted(vocabulario_final[chave], key = lambda x:(-x[1], [ABECEDARIO[letra] for letra in x[0]]))
         vocabulario_final[chave] = tuple(vocabulario_final[chave])
-    
     return vocabulario_final
 
 # Seletores
@@ -497,11 +499,7 @@ def ficheiro_para_vocabulario(nome_fich):
             palavra = linha.strip().upper()
             if 2 <= len(palavra) <= TAMANHO_DO_TABULEIRO and all(letra in ABECEDARIO for letra in palavra):
                 palavras_validas.append(palavra)
-            if not palavra:
-                continue
-            else:
-                continue
-    return cria_vocabulario(tuple(palavras_validas))
+    return cria_vocabulario(tuple(set(palavras_validas)))
 
 def vocabulario_para_str(vocabulario):
     palavras = []
@@ -530,7 +528,7 @@ def procura_palavra_padrao(vocabulario, padrao, letras, min_pontos):
         melhor_palavra = ''
         melhor_pontuacao = 0
         # Cria um conjunto de letras únicas disponíveis para a primeira posição.
-        possivel_primeira_letras = sorted(list(set(letras)), key=lambda x: ABECEDARIO.index(x))
+        possivel_primeira_letras = sorted(list(set(letras)), key=lambda x: ABECEDARIO[x])
 
         # Itera sobre cada letra única como uma possível primeira letra.
         for possivel_letra in possivel_primeira_letras:
@@ -638,7 +636,12 @@ def eh_tabuleiro_vazio(arg):
 
 # Teste
 def tabuleiros_iguais(t1, t2):
-    return t1 == t2
+    for linha in range(1, TAMANHO_DO_TABULEIRO + 1):
+        for coluna in range(1, TAMANHO_DO_TABULEIRO + 1):
+            casa = cria_casa(linha, coluna)
+            if obtem_letra(t1, casa) != obtem_letra(t2, casa):
+                return False
+    return True
 
 # Transformador
 def tabuleiro_para_str(tab):
@@ -862,7 +865,7 @@ def baralha_saco(estado):
     for letra in saco:
             lista_letras.extend([letra] * saco[letra])
     
-    lista_letras.sort(key=lambda x: ABECEDARIO.index(x))
+    lista_letras.sort(key=lambda x: ABECEDARIO[x])
 
     permuta_letras(lista_letras, estado)
         
@@ -926,6 +929,10 @@ def jogar(tab, jog, vocab, pilha, jogada_recebida):
     palavra = jogada_recebida[4]
     casa_final = incrementa_casa(casa_inicial, direcao, len(palavra) - 1)
     
+    #print(f"DEBUG: Jogada recebida: {jogada_recebida}") # Ver input
+    #print(f"DEBUG: Palavra processada: {palavra}, Direção: {direcao}") # Ver maiúsculas
+
+
     if direcao not in ('H', 'V') or len(palavra) < 2:
         return False
     
@@ -938,6 +945,10 @@ def jogar(tab, jog, vocab, pilha, jogada_recebida):
     
     padrao = obtem_padrao(tab, casa_inicial, casa_final)
     letras_jogador = jogador_letras(jog)
+    #print(f"DEBUG: Padrão obtido: '{padrao}'")
+    #print(f"DEBUG: Letras do jogador: '{letras_jogador}'")
+    resultado_teste = testa_palavra_padrao(vocab, palavra, padrao, letras_jogador)
+    #print(f"DEBUG: Resultado de testa_palavra_padrao: {resultado_teste}") # Ver o resultado
 
     if not testa_palavra_padrao(vocab, palavra, padrao, letras_jogador):
         return False
@@ -1050,3 +1061,63 @@ def jogada_agente(tab, jog, vocab, pilha):
     else:
         print('Jogada ' + str(nivel) + ': P')
         return False
+  
+def scrabble2(jogadores, nome_fich, estado):
+    print("Bem-vindo ao SCRABBLE2.")
+    tab=cria_tabuleiro()
+    
+    if not isinstance(jogadores, tuple) or not(NUM_MIN_JOGADORES <= len(jogadores) <= NUM_MAX_JOGADORES ):
+        raise ValueError("scrabble2: argumentos inválidos")
+    if type(estado) != int or estado < 0 :
+        raise ValueError("scrabble2: argumentos inválidos")
+    pilha = baralha_saco(estado)        
+    
+    lista_de_jogadores = []
+    for jogador in jogadores:
+        if not(isinstance(jogador, str)) or jogador  == '':
+            raise ValueError("scrabble2: argumentos inválidos")
+        if jogador[0] == '@':
+            lista_de_jogadores.append(cria_agente(jogador[1:]))
+        else:
+            lista_de_jogadores.append(cria_humano(jogador))
+    
+    for jog in lista_de_jogadores:
+        distribui_letras(jog, pilha, NUM_LETRAS_JOGADOR)
+    
+    vocab = ficheiro_para_vocabulario(nome_fich)
+    passagens_seguidas = 0
+    indice_jogador_atual = 0
+    jogo_continua = True
+    while jogo_continua:
+        print(tabuleiro_para_str(tab))
+        for jog in lista_de_jogadores:
+            print(jogador_para_str(jog))
+        
+        if eh_humano(lista_de_jogadores[indice_jogador_atual]):
+            jogada = jogada_humano(tab, lista_de_jogadores[indice_jogador_atual], vocab, pilha)
+        else:
+            jogada = jogada_agente(tab, lista_de_jogadores[indice_jogador_atual], vocab, pilha)
+
+        if jogada ==  False:
+            passagens_seguidas += 1
+        else:
+            passagens_seguidas = 0
+        
+        if passagens_seguidas == len(lista_de_jogadores):
+            jogo_continua = False
+            break
+        
+        if (jogador_letras(lista_de_jogadores[indice_jogador_atual]) == '' 
+            and pilha == []):
+            jogo_continua = False
+            break
+        
+        if indice_jogador_atual + 1 == len(lista_de_jogadores):
+            indice_jogador_atual = 0        
+        else:
+            indice_jogador_atual += 1
+
+    return tuple(jogador_pontos(jog) for jog in lista_de_jogadores)
+
+#jog = ('Maria', '@MEDIO','@DIFICIL', )
+#scrabble2(jog, 'vocab25k.txt',32)
