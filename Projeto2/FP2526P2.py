@@ -17,7 +17,8 @@ NUM_MAX_JOGADORES = 4
 NUM_MIN_JOGADORES = 2
 TAMANHO_DO_TABULEIRO = 15
 
-# TAD Casa
+# ----------------------------------- TAD CASA ----------------------------------- #
+
 # Construtores
 def cria_casa(lin, col):
     """
@@ -161,7 +162,8 @@ def incrementa_casa(c, d, s):
         
     return cria_casa(nova_linha, nova_col)
 
-# TAD jogador
+# --------------------------------- TAD JOGADOR ---------------------------------- #
+
 # Construtores
 def cria_humano(nome):
     """
@@ -400,9 +402,25 @@ def distribui_letras(jog, saco, num):
             recebe_letra(jog, letra)
     return jog
 
-# Construtor
+# ------------------------------- TAD VOCABULARIO -------------------------------- #
+
+# Construtores
 def cria_vocabulario(v):
-    if not isinstance(v, tuple) or not len(v) >= 1:
+    """
+    Cria um TAD vocabulario a partir de um tuplo de palavras
+
+    Args:
+        v (tuple): um tuplo de palavras para criar o vocabulario
+
+    Returns:
+        vocabulario: o TAD vocabulario
+
+    Raise:
+        ValueError: 
+
+
+    """
+    if not isinstance(v, tuple) or v == () or len(v) != len(set(v)):
         raise ValueError("cria_vocabulario: argumento inválido")
     vocabulario_final = {}
     for palavra in v:
@@ -415,7 +433,6 @@ def cria_vocabulario(v):
         for i in range(len(palavra)):
             if palavra[i] not in ABECEDARIO:
                 raise ValueError("cria_vocabulario: argumento inválido")
-        
         
         comprimento = len(palavra)
         letra_inicial = palavra[0] 
@@ -434,6 +451,16 @@ def cria_vocabulario(v):
 
 # Seletores
 def obtem_pontos(vocabulario, palavra):
+    """
+    Devolve a pontuação de uma palavra que está no vocabulario
+
+    Args:
+        vocabulario (universal): o TAD vocabulario onde se vai procurar
+        palavra (str): a palavra para saber os pontos
+
+    Returns:
+        int: os pontos da palavra, ou 0 se não existir
+    """
     chave = (len(palavra), palavra[0])
     if chave in vocabulario:
         # Percorre o tuplo de palavras para encontrar a correspondente
@@ -443,6 +470,17 @@ def obtem_pontos(vocabulario, palavra):
     return 0  # Retorna 0 se a palavra não for encontrada
 
 def obtem_palavras(vocabulario, comp, letra):
+    """
+    Devolve um tuplo com as palavras com um certo tamanho e letra inicial
+
+    Args:
+        vocabulario (universal): o TAD vocabulario onde de vai buscar as palavras
+        comp (int): o comprimento das palavras
+        letra (str): a letra com que as palavras devem começar
+
+    Returns:
+        tuple: um tuplo com as palavras encontradas, ou um tuplo vazio se não encontrar nenhuma
+    """
     chave = (comp, letra)
     if chave not in vocabulario:
         return ()
@@ -450,6 +488,19 @@ def obtem_palavras(vocabulario, comp, letra):
 
 # Teste
 def testa_palavra_padrao(vocabulario, palavra, padrao, conj):
+    """
+    Vê se uma palavra pode ser formada num padrão, usando as letras que o jogador tem e se a palavra existe no vocabulario
+
+    Args:
+        vocabulario (universal): o TAD vocabulario para ver se a palavra é válida
+        palavra (str): a palavra que se quer testar
+        padrao (str): o padrão do tabuleiro onde se quer jogar
+        conj (str): uma string com as letras que o jogador tem na mão
+
+    Returns:
+        bool: True se der para formar a palavra, False se não der
+
+    """
     if len(palavra) != len(padrao) or obtem_pontos(vocabulario, palavra) == 0:
         return False
     
@@ -480,18 +531,13 @@ def testa_palavra_padrao(vocabulario, palavra, padrao, conj):
 
 def ficheiro_para_vocabulario(nome_fich):
     """
-    Lê um ficheiro de texto e cria um TAD vocabulario com as palavras válidas.
-
-    A função processa um ficheiro com uma palavra por linha, ignora linhas
-    vazias, converte as palavras para maiúsculas e filtra-as de acordo
-    com as regras do projeto (comprimento 2-15, letras do abecedário
-    português).
+    Lê um ficheiro de texto e cria um TAD vocabulario com as palavras válidas
 
     Args:
-        nome_fich (str): O nome do ficheiro a ser lido.
+        nome_fich (str): o nome do ficheiro para ler
 
     Returns:
-        vocabulario: O TAD vocabulario criado com as palavras válidas.
+        vocabulario: o TAD vocabulario criado a partir do ficheiro
     """
     palavras_validas = []
     with open(nome_fich, 'r') as f:
@@ -502,6 +548,16 @@ def ficheiro_para_vocabulario(nome_fich):
     return cria_vocabulario(tuple(set(palavras_validas)))
 
 def vocabulario_para_str(vocabulario):
+    """
+    Transforma o TAD vocabulario numa string legível
+
+    Args:
+        vocabulario (universal): o TAD vocabulario que se quer converter
+
+    Returns:
+        str: uma string com todas as palavras do vocabulario, uma por linha
+
+    """
     palavras = []
     for comprimento in range(2, TAMANHO_DO_TABULEIRO + 1):
         for letra in ABECEDARIO:
@@ -515,6 +571,19 @@ def vocabulario_para_str(vocabulario):
 
 # Funcões de alto nível
 def procura_palavra_padrao(vocabulario, padrao, letras, min_pontos):
+    """
+    Procura a melhor palavra que encaixa num padrão, usando as letras do jogador e que tenha uma pontuação mínima
+
+    Args:
+        vocabulario (universal): o TAD vocabulario para procurar palavras
+        padrao (str): o padrão do tabuleiro onde se quer jogar
+        letras (str): uma string com as letras que o jogador tem na mão
+        min_pontos (int): a pontuação mínima que a palavra tem de ter
+
+    Returns:
+        tuple: um tuplo com a melhor palavra e a sua pontuação, ou ('', 0) se não encontrar nada
+
+    """
     if padrao[0] != '.':
         primeira_letra = padrao[0]
         palavras_validas = obtem_palavras(vocabulario, len(padrao), primeira_letra)
@@ -542,18 +611,19 @@ def procura_palavra_padrao(vocabulario, padrao, letras, min_pontos):
                         melhor_pontuacao = pontuacao
         return (melhor_palavra, melhor_pontuacao)
     
-# TAD Tabuleiro
+# --------------------------------- TAD TABULEIRO -------------------------------- #
+
 # Construtor
 def cria_tabuleiro():
     """"
-    cria um tabuleiro vazio 15x15
+    cria um tabuleiro de jogo vazio
 
     Args:
         Nenhum
 
     Returns:
-        list: lista de 15 listas, cada uma com 15 elementos
-              onde cada casa livre é rrepresentada por "."
+        tabuleiro: um tabuleiro 15x15 vazio, só com pontos
+
     """
     tab = []
     
@@ -566,14 +636,14 @@ def cria_tabuleiro():
 # Seletores
 def obtem_letra(t, c):
     """
-    mostra a letra que está numa casa do tabuleiro
+    Devolve a letra que está numa casa do tabuleiro
 
     Args:
-        tab (list): tabuleiro 15x15
-        casa (tuple): (linha, coluna), entre 1 e 15
+        t (universal): o TAD tabuleiro
+        c (casa): o TAD casa que se pretende obter a letra
 
     Returns:
-        str: letra ou se não estiver nenhuma letra nessa casa devolve uma string vazia
+        str: a letra que está na casa, ou uma string vazia se estiver livre
     """
     lin = obtem_lin(c)
     col = obtem_col(c)
@@ -587,8 +657,8 @@ def obtem_valor_aux(t, c):
     Função auxiliar que mostra o valor que está numa casa do tabuleiro
 
     Args:
-        tab (list): tabuleiro 15x15
-        casa (tuple): (linha, coluna), entre 1 e 15
+        t (universal): o TAD tabuleiro
+        c (casa): o TAD casa que se pretende obter a letra
 
     Returns:
         str: letra ou '.'
@@ -601,15 +671,15 @@ def obtem_valor_aux(t, c):
 # Modificadores
 def insere_letra(t, c, l):
     """
-    insere uma letra numa casa do tabuleiro (modificando destrutivamente)
+    Insere uma letra numa casa do tabuleiro (modificando destrutivamente)
 
     Args:
-        tab (list): tabuleiro 15x15
-        casa (tuple): (linha, coluna), entre 1 e 15
-        letra (str): letra a inserir
+        t (universal): o TAD tabuleiro que vai ser modificado
+        c (casa): o TAD casa onde a letra vai ser inserida
+        l (str): a letra para inserir
 
     Returns:
-        list: tabuleiro modificado
+        tabuleiro: tabuleiro modificado
     """
     lin = obtem_lin(c)
     col = obtem_col(c)
@@ -618,6 +688,15 @@ def insere_letra(t, c, l):
 
 # Reconhecedor
 def eh_tabuleiro(arg):
+    """
+    Vê se o argumento é um TAD tabuleiro
+
+    Args:
+        arg (universal): o argumento para verificar
+
+    Returns:
+        bool: True se for um tabuleiro, False se não for
+    """
     for i in range(1, TAMANHO_DO_TABULEIRO + 1):
         for j in range(1, TAMANHO_DO_TABULEIRO + 1):
             letra = obtem_letra(arg, cria_casa(i, j))
@@ -628,6 +707,15 @@ def eh_tabuleiro(arg):
     return True
 
 def eh_tabuleiro_vazio(arg):
+    """
+    Vê se um tabuleiro vazio
+
+    Args:
+        arg (universal): o TAD tabuleiro para verificar
+
+    Returns:
+        bool: True se o tabuleiro estiver vazio, False caso contrário
+    """
     for i in range(1, TAMANHO_DO_TABULEIRO +1):
         for j in range(1, TAMANHO_DO_TABULEIRO + 1):
             if obtem_valor_aux(arg, cria_casa(i, j)) != '.':
@@ -636,6 +724,16 @@ def eh_tabuleiro_vazio(arg):
 
 # Teste
 def tabuleiros_iguais(t1, t2):
+    """
+    Vê se dois tabuleiros são iguais
+
+    Args:
+        t1 (universal): o primeiro TAD tabuleiro
+        t2 (universal): o segundo TAD tabuleiro
+
+    Returns:
+        bool: True se forem iguais, False se não forem
+    """
     for linha in range(1, TAMANHO_DO_TABULEIRO + 1):
         for coluna in range(1, TAMANHO_DO_TABULEIRO + 1):
             casa = cria_casa(linha, coluna)
@@ -646,13 +744,13 @@ def tabuleiros_iguais(t1, t2):
 # Transformador
 def tabuleiro_para_str(tab):
     """
-    converte o tabuleiro numa representação string legível
+    Converte o tabuleiro numa representação string legível
 
     Args:
-        tab (list): tabuleiro 15x15
+        tab (universal): o TAD tabuleiro
 
     Returns:
-        str: representação textual do tabuleiro
+        str: a string que representa o tabuleiro
     """
     tabuleiro = []
     
@@ -698,6 +796,17 @@ def tabuleiro_para_str(tab):
 
 # Funções de alto-nível
 def obtem_padrao(tab, i, f):
+    """
+    Devolve o padrão de letras e pontos entre duas casas
+
+    Args:
+        tab (universal): o TAD tabuleiro
+        i (casa): a casa inicial
+        f (casa): a casa final
+
+    Returns:
+        str: o padrão de letras e pontos
+    """
     padrao = ''
     distancia = 0
     direcao = None
@@ -726,13 +835,13 @@ def insere_palavra(tab, casa, direcao, palavra):
     modificando destrutivamente o tabuleiro
 
     Args:
-        tab (list): tabuleiro 15x15
-        casa (tuple): (linha, coluna), entre 1 e 15
+        tab (universal): o TAD tabuleiro
+        casa (casa): a casa onde a palavra começa
         direcao (str): 'H' para horizontal ou 'V' para vertical
         palavra (str): palavra a inserir
 
     Returns:
-        list: tabuleiro modificado
+        tabuleiro: tabuleiro modificado
 
     Raise:
         ValueError: se a palavra não couber dentro dos limites do tabuleiro
@@ -761,6 +870,18 @@ def insere_palavra(tab, casa, direcao, palavra):
     return tab
 
 def obtem_subpadroes(tab, i, f, l):
+    """
+    Devolve todos os subpadrões válidos entre duas casas
+
+    Args:
+        tab (universal): o TAD tabuleiro
+        i (casa): a casa inicial da linha/coluna
+        f (casa): a casa final da linha/coluna
+        l (int): o número de letras que o jogador tem
+
+    Returns:
+        tuple: um tuplo com os subpadrões e outro com as casas iniciais correspondentes
+    """
     # Determina a direção e obtem o padrão principal
     direcao = 'H' if obtem_lin(i) == obtem_lin(f) else 'V'
     padrao = obtem_padrao(tab, i, f)
@@ -795,6 +916,17 @@ def obtem_subpadroes(tab, i, f, l):
     return tuple(sub_padroes), tuple(casas_inicias)
 
 def gera_todos_padroes(tab, l):
+    """
+    Gera todos os padrões possíveis no tabuleiro inteiro
+
+    Args:
+        tab (universal): o TAD tabuleiro
+        l (int): o número de letras que o jogador tem
+
+    Returns:
+        tuple: um tuplo com todos os padrões, um com as casas iniciais e outro com as direções
+
+    """
     todos_padroes = []
     todas_casas = []
     todas_direcoes = []
@@ -816,7 +948,9 @@ def gera_todos_padroes(tab, l):
         todas_direcoes.extend(['V'] * len(sub_padroes_v))
 
     return tuple(todos_padroes), tuple(todas_casas), tuple(todas_direcoes)
-    
+
+# ----------------------------- FUNÇÕES PRINCIPAIS DO JOGO ----------------------------- #
+
 def gera_numero_aleatorio(estado):
     """
     gera um número pseudo-aleatório usando o algoritmo xorshift
@@ -844,7 +978,7 @@ def permuta_letras(letras, estado):
         estado (int): estado inicial do gerador de numeros aleatórios
 
     Returns:
-        não retorna nada, alterando destrutivamente o argumento letras
+        None: não devolve nada, só mexe na lista
     """
     n = len(letras)
     for i in range(n - 1, 0, -1):
@@ -853,6 +987,15 @@ def permuta_letras(letras, estado):
         letras[i], letras[j] = letras[j], letras[i]
         
 def baralha_saco(estado):
+    """
+    Cria a pilha de letras do jogo e baralha-a
+
+    Args:
+        estado (int): o estado para o gerador de números aleatórios
+
+    Returns:
+        list: a lista de letras do saco, toda baralhada
+    """
     saco = {
             'A':14, 'B': 3,'C': 4,'Ç':2, 'D':5, 'E':11,
             'F':2, 'G': 2,'H': 2,'I': 10,'J': 2,'L': 5,
@@ -872,6 +1015,19 @@ def baralha_saco(estado):
     return lista_letras
 
 def jogada_humano(tab, jog, vocab, pilha):
+    """
+    Processa a jogada de um jogador humano, lendo o que ele escreve
+
+    Args:
+        tab (universal): o TAD tabuleiro do jogo
+        jog (universal): o TAD jogador que vai jogar
+        vocab (universal): o TAD vocabulario com as palavras
+        pilha (list): a pilha de letras 
+
+    Returns:
+        bool: True se a jogada for válida (jogou ou trocou), False se passou a vez
+
+    """
     # Até as instruções serem válidas
     while True:
         # Recebe um input com as instruções do jogador
@@ -899,6 +1055,18 @@ def jogada_humano(tab, jog, vocab, pilha):
                 return True
             
 def processa_troca(jogada_recebida, jog, pilha):
+    """
+    Função auxiliar para tratar da troca de letras de um jogador
+
+    Args:
+        jogada_recebida (list): a lista com o comando 'T' e as letras para trocar
+        jog (universal): o TAD jogador que quer trocar
+        pilha (list): a pilha de letras do jogo
+
+    Returns:
+        bool: True se a troca foi bem sucedida, False se não foi
+
+    """
     # Extrai as letras que o jogador deseja trocar
     letras_para_troca = jogada_recebida[1:]
     
@@ -918,6 +1086,20 @@ def processa_troca(jogada_recebida, jog, pilha):
     return False
 
 def jogar(tab, jog, vocab, pilha, jogada_recebida):
+    """
+    Função auxiliar para tratar de uma jogada de palavra
+
+    Args:
+        tab (universal): o TAD tabuleiro
+        jog (universal): o TAD jogador que joga
+        vocab (universal): o TAD vocabulario
+        pilha (list): a pilha de letras
+        jogada_recebida (list): o comando 'J' com a posição, direção e palavra
+
+    Returns:
+        bool: True se a jogada foi válida, False se não foi
+
+    """
     if len(jogada_recebida)<5:
         return False
 
@@ -927,28 +1109,20 @@ def jogar(tab, jog, vocab, pilha, jogada_recebida):
     casa_inicial = cria_casa(linha, coluna)
     direcao = jogada_recebida[3]
     palavra = jogada_recebida[4]
+    pontuacao = obtem_pontos(vocab, palavra)
+    if pontuacao == 0:
+        return False
     casa_final = incrementa_casa(casa_inicial, direcao, len(palavra) - 1)
-    
-    #print(f"DEBUG: Jogada recebida: {jogada_recebida}") # Ver input
-    #print(f"DEBUG: Palavra processada: {palavra}, Direção: {direcao}") # Ver maiúsculas
-
 
     if direcao not in ('H', 'V') or len(palavra) < 2:
         return False
     
-    pontuacao = obtem_pontos(vocab, palavra)
-    if pontuacao == 0:
-        return False
-
     if casas_iguais(casa_final, casa_inicial) and len(palavra) > 1:
         return False
     
     padrao = obtem_padrao(tab, casa_inicial, casa_final)
     letras_jogador = jogador_letras(jog)
-    #print(f"DEBUG: Padrão obtido: '{padrao}'")
-    #print(f"DEBUG: Letras do jogador: '{letras_jogador}'")
     resultado_teste = testa_palavra_padrao(vocab, palavra, padrao, letras_jogador)
-    #print(f"DEBUG: Resultado de testa_palavra_padrao: {resultado_teste}") # Ver o resultado
 
     if not testa_palavra_padrao(vocab, palavra, padrao, letras_jogador):
         return False
@@ -980,11 +1154,23 @@ def jogar(tab, jog, vocab, pilha, jogada_recebida):
     distribui_letras(jog, pilha, contar_letras_usadas)
 
     # Atualiza a pontuação do jogador
-    soma_pontos(jog, pontuacao)
+    soma_pontos(jog, obtem_pontos(vocab, palavra))
     
     return True
 
 def jogada_agente(tab, jog, vocab, pilha):
+    """
+    Processa a jogada de um jogador agente (bot), dependendo nível acessa mais palavras
+
+    Args:
+        tab (universal): o TAD tabuleiro
+        jog (universal): o TAD jogador agente
+        vocab (universal): o TAD vocabulario
+        pilha (list): a pilha de letras
+
+    Returns:
+        bool: True se o agente conseguiu jogar ou trocar letras, False se passou a vez
+    """
     nivel = jogador_identidade(jog)
     letras_agente = jogador_letras(jog)
     numero_letras = len(letras_agente)
@@ -1063,6 +1249,23 @@ def jogada_agente(tab, jog, vocab, pilha):
         return False
   
 def scrabble2(jogadores, nome_fich, estado):
+    """
+    Função principal que corre o jogo Scrabble2
+
+    Args:
+        jogadores (tuple): um tuplo com os nomes dos jogadores (humanos ou agentes)
+        nome_fich (str): o nome do ficheiro do vocabulário
+        estado (int): a seed para o gerador de números aleatórios
+
+    Returns:
+        tuple: um tuplo com as pontuações finais de cada jogador
+
+    Raise:
+        ValueError: 
+
+        
+
+    """
     print("Bem-vindo ao SCRABBLE2.")
     tab=cria_tabuleiro()
     
