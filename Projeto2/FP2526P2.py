@@ -311,7 +311,10 @@ def eh_jogador(arg):
     Returns:
         bool: True se for um jogador, False caso contrário
     """
-    return ('nome' in arg or 'nivel' in arg)
+    if type(arg) != dict:
+        return False
+    else: 
+        return ('nome' in arg or 'nivel' in arg)           #CUIDADO COM A BARRAREIRA
 
 def eh_humano(arg):
     """
@@ -323,7 +326,9 @@ def eh_humano(arg):
     Returns:
         bool: True se for um jogador humano, False caso contrário
     """
-    return 'nome' in arg
+    if not eh_jogador(arg):
+        return False
+    return 'nome' in arg           #CUIDADO COM A BARRAREIRA
 
 def eh_agente(arg):
     """
@@ -335,7 +340,9 @@ def eh_agente(arg):
     Returns:
         bool: True se for um jogador agente, False caso contrário
     """
-    return 'nivel' in arg
+    if not eh_jogador(arg):
+        return False
+    return 'nivel' in arg           #CUIDADO COM A BARRAREIRA
 
 # Teste
 def jogadores_iguais(j1, j2):
@@ -349,6 +356,10 @@ def jogadores_iguais(j1, j2):
     Returns:
         bool: True se os jogadores forem iguais, False caso contrário
     """
+    if not(eh_jogador(j1) and eh_jogador(j2)):
+        return False
+    if eh_humano(j1) != eh_humano(j2):
+        return False
     return ((jogador_identidade(j1) == jogador_identidade(j2))
             and jogador_pontos(j1) == jogador_pontos(j2)
             and jogador_letras(j1) == jogador_letras(j2))
@@ -697,14 +708,15 @@ def eh_tabuleiro(arg):
     Returns:
         bool: True se for um tabuleiro, False se não for
     """
-    for i in range(1, TAMANHO_DO_TABULEIRO + 1):
-        for j in range(1, TAMANHO_DO_TABULEIRO + 1):
-            letra = obtem_letra(arg, cria_casa(i, j))
-            if letra not in ABECEDARIO:
-                return False
-            if letra == '' and obtem_valor_aux(arg, cria_casa(i, j)) != '.':
-                return False
-    return True
+    if type(arg) != list:
+        return False
+    else:
+        for i in range(1, TAMANHO_DO_TABULEIRO + 1):
+            for j in range(1, TAMANHO_DO_TABULEIRO + 1):
+                letra = obtem_letra(arg, cria_casa(i, j))
+                if letra != '' and letra not in ABECEDARIO:
+                    return False
+        return True
 
 def eh_tabuleiro_vazio(arg):
     """
@@ -716,11 +728,16 @@ def eh_tabuleiro_vazio(arg):
     Returns:
         bool: True se o tabuleiro estiver vazio, False caso contrário
     """
-    for i in range(1, TAMANHO_DO_TABULEIRO +1):
-        for j in range(1, TAMANHO_DO_TABULEIRO + 1):
-            if obtem_valor_aux(arg, cria_casa(i, j)) != '.':
-                return False
-    return True
+    if type(arg) != list:
+        return False
+    else:
+        for i in range(1, TAMANHO_DO_TABULEIRO +1):
+            for j in range(1, TAMANHO_DO_TABULEIRO + 1):
+                if obtem_valor_aux(arg, cria_casa(i, j)) != '.':
+                    return False
+        return True
+
+
 
 # Teste
 def tabuleiros_iguais(t1, t2):
@@ -734,12 +751,15 @@ def tabuleiros_iguais(t1, t2):
     Returns:
         bool: True se forem iguais, False se não forem
     """
-    for linha in range(1, TAMANHO_DO_TABULEIRO + 1):
-        for coluna in range(1, TAMANHO_DO_TABULEIRO + 1):
-            casa = cria_casa(linha, coluna)
-            if obtem_letra(t1, casa) != obtem_letra(t2, casa):
-                return False
-    return True
+    if type(t1) != list or type(t2) != list:
+        return False
+    else:
+        for linha in range(1, TAMANHO_DO_TABULEIRO + 1):
+            for coluna in range(1, TAMANHO_DO_TABULEIRO + 1):
+                casa = cria_casa(linha, coluna)
+                if obtem_letra(t1, casa) != obtem_letra(t2, casa):
+                    return False
+        return True
 
 # Transformador
 def tabuleiro_para_str(tab):
@@ -1277,7 +1297,7 @@ def scrabble2(jogadores, nome_fich, estado):
     
     lista_de_jogadores = []
     for jogador in jogadores:
-        if not(isinstance(jogador, str)) or jogador  == '':
+        if not(isinstance(jogador, str)) or jogador  == '' or jogador == '@':
             raise ValueError("scrabble2: argumentos inválidos")
         if jogador[0] == '@':
             lista_de_jogadores.append(cria_agente(jogador[1:]))
