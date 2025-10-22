@@ -662,22 +662,6 @@ def obtem_letra(t, c):
         return ''
     else:
         return t[lin - 1][col - 1]
-    
-def obtem_valor_aux(t, c):
-    """
-    Função auxiliar que mostra o valor que está numa casa do tabuleiro
-
-    Args:
-        t (universal): o TAD tabuleiro
-        c (casa): o TAD casa que se pretende obter a letra
-
-    Returns:
-        str: letra ou '.'
-    """
-    if obtem_letra(t, c) == '':
-        return '.'
-    else:
-        return obtem_letra(t, c)
 
 # Modificadores
 def insere_letra(t, c, l):
@@ -733,7 +717,7 @@ def eh_tabuleiro_vazio(arg):
     else:
         for i in range(1, TAMANHO_DO_TABULEIRO +1):
             for j in range(1, TAMANHO_DO_TABULEIRO + 1):
-                if obtem_valor_aux(arg, cria_casa(i, j)) != '.':
+                if obtem_letra(arg, cria_casa(i, j)) != '':
                     return False
         return True
 
@@ -1129,8 +1113,8 @@ def jogar(tab, jog, vocab, pilha, jogada_recebida):
     casa_inicial = cria_casa(linha, coluna)
     direcao = jogada_recebida[3]
     palavra = jogada_recebida[4]
-    pontuacao = obtem_pontos(vocab, palavra)
-    if pontuacao == 0:
+    
+    if obtem_pontos(vocab, palavra) == 0:
         return False
     casa_final = incrementa_casa(casa_inicial, direcao, len(palavra) - 1)
 
@@ -1142,7 +1126,6 @@ def jogar(tab, jog, vocab, pilha, jogada_recebida):
     
     padrao = obtem_padrao(tab, casa_inicial, casa_final)
     letras_jogador = jogador_letras(jog)
-    resultado_teste = testa_palavra_padrao(vocab, palavra, padrao, letras_jogador)
 
     if not testa_palavra_padrao(vocab, palavra, padrao, letras_jogador):
         return False
@@ -1288,7 +1271,9 @@ def scrabble2(jogadores, nome_fich, estado):
     """
     print("Bem-vindo ao SCRABBLE2.")
     tab=cria_tabuleiro()
-    
+    insere_palavra(tab, cria_casa(8,1), 'H', 'FUNDAMENTOS')
+    insere_palavra(tab, cria_casa(8,4), 'V', 'DA')
+    insere_palavra(tab, cria_casa(2,6), 'V', 'PROGRAMAÇAO')
     if not isinstance(jogadores, tuple) or not(NUM_MIN_JOGADORES <= len(jogadores) <= NUM_MAX_JOGADORES ):
         raise ValueError("scrabble2: argumentos inválidos")
     if type(estado) != int or estado < 0 :
@@ -1341,3 +1326,9 @@ def scrabble2(jogadores, nome_fich, estado):
             indice_jogador_atual += 1
 
     return tuple(jogador_pontos(jog) for jog in lista_de_jogadores)
+
+#jogs = ('J1', 'J2', 'J3')
+#scrabble2(jogs, 'vocab25k.txt', 48)
+
+jogs = ('@DIFICIL','@DIFICIL','@DIFICIL')
+scrabble2(jogs, 'vocab25k.txt', 1)
