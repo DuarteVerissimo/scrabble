@@ -1271,9 +1271,7 @@ def scrabble2(jogadores, nome_fich, estado):
     """
     print("Bem-vindo ao SCRABBLE2.")
     tab=cria_tabuleiro()
-    insere_palavra(tab, cria_casa(8,1), 'H', 'FUNDAMENTOS')
-    insere_palavra(tab, cria_casa(8,4), 'V', 'DA')
-    insere_palavra(tab, cria_casa(2,6), 'V', 'PROGRAMAÇAO')
+    
     if not isinstance(jogadores, tuple) or not(NUM_MIN_JOGADORES <= len(jogadores) <= NUM_MAX_JOGADORES ):
         raise ValueError("scrabble2: argumentos inválidos")
     if type(estado) != int or estado < 0 :
