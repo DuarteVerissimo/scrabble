@@ -678,7 +678,7 @@ def insere_letra(t, c, l):
     """
     lin = obtem_lin(c)
     col = obtem_col(c)
-    t[lin - 1][col - 1] = l
+    t[lin - 1][col - 1] = l.upper()                 #### TENTATIVA TestTabuleiroInsereObtemLetra::test_1
     return t
 
 # Reconhecedor
@@ -769,18 +769,20 @@ def tabuleiro_para_str(tab):
     tabuleiro.append("   +" + "-" * 31 + "+")
 
     # Cada linha do tabuleiro é constitiuda pelo número da linha e o conteúdo das células
-    for i in range(TAMANHO_DO_TABULEIRO):
-        if i + 1 < 10:
-            numeros_das_linhas = ' ' + str(i + 1)
+    for i in range(1, TAMANHO_DO_TABULEIRO + 1):
+        if i < 10:
+            numeros_das_linhas = ' ' + str(i)
         
         else:
-            numeros_das_linhas = str(i + 1)
+            numeros_das_linhas = str(i)
     
         linha = numeros_das_linhas + " |"
         
-        for j in range(TAMANHO_DO_TABULEIRO):
-            linha += " " + tab[i][j]
-        
+        for j in range(1, TAMANHO_DO_TABULEIRO + 1):
+            if obtem_letra(tab, cria_casa(i, j)) == '':   
+                linha += " " + "."
+            else:
+                linha += " " + obtem_letra(tab, cria_casa(i, j))
         linha += " |"
         
         tabuleiro.append(linha)
@@ -789,14 +791,11 @@ def tabuleiro_para_str(tab):
     tabuleiro.append("   +" + "-" * 31 + "+")
 
     # Junta todas as linhas numa única string separada por quebras de linha
-    resultado=""
+    resultado = ""
     for k in range(len(tabuleiro)): 
-        if k < (len(tabuleiro) -1):
             resultado += tabuleiro[k] + "\n"
-        else:
-            resultado += tabuleiro[k]
     
-    return resultado
+    return resultado.rstrip()                   ###### TENTATIVA TAD TABULEIRO
 
 # Funções de alto-nível
 def obtem_padrao(tab, i, f):
@@ -1038,9 +1037,8 @@ def jogada_humano(tab, jog, vocab, pilha):
     while True:
         # Recebe um input com as instruções do jogador
         jogada = input("Jogada " + str(jogador_identidade(jog)) + ": ")
-        if '  'in jogada:
-            continue
-        jogada_recebida = jogada.strip().split()                                ####TENTATIVA TestScrabble2::test_4
+
+        jogada_recebida = jogada.strip().split()                                ### TENTATIVA CORRIGIR ERROS JOGADA HUMANO
         
         if len(jogada_recebida) == 0:
             continue
@@ -1279,7 +1277,7 @@ def scrabble2(jogadores, nome_fich, estado):
     if type(estado) != int or estado < 0 :
         raise ValueError("scrabble2: argumentos inválidos")
     if isinstance(nome_fich, str) == False:
-        raise ValueError("scrabble2: argumentos inválidos")                 ### tentativa TestScrabble2Exceptions::test_6
+        raise ValueError("scrabble2: argumentos inválidos")
     
     pilha = baralha_saco(estado)        
     
@@ -1289,7 +1287,7 @@ def scrabble2(jogadores, nome_fich, estado):
             raise ValueError("scrabble2: argumentos inválidos")
         if jogador[0] == '@':
             if jogador[1:] not in ('FACIL', 'MEDIO', 'DIFICIL'):
-                raise ValueError("scrabble2: argumentos inválidos")         ##### TENTATIVA TestScrabble2Exceptions::test_4
+                raise ValueError("scrabble2: argumentos inválidos")
             lista_de_jogadores.append(cria_agente(jogador[1:]))
         else:
             lista_de_jogadores.append(cria_humano(jogador))
