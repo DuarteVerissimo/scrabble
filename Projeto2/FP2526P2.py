@@ -193,7 +193,7 @@ def cria_agente(nivel):
         jogador: O TAD que representa o jogador agente
 
     Raises:
-        ValueError: Se o nível for inválido
+        ValueError: Se o nível não for ('FACIL', 'MEDIO', 'DIFICIL')
     """
     if nivel not in ('FACIL', 'MEDIO', 'DIFICIL'):
         raise ValueError("cria_agente: argumento inválido")
@@ -427,9 +427,10 @@ def cria_vocabulario(v):
         vocabulario: o TAD vocabulario
 
     Raise:
-        ValueError: 
-
-
+        ValueError: se o vocabulário não for um tuplo ou estiver vazio
+                    se o vocabulário tiver palavras repetidas
+                    se a palavra não for uma string ou se não cumprir com as dimensões
+                    se a letra não estiver no alfabeto
     """
     if not isinstance(v, tuple) or v == () or len(v) != len(set(v)):
         raise ValueError("cria_vocabulario: argumento inválido")
@@ -676,9 +677,11 @@ def insere_letra(t, c, l):
     Returns:
         tabuleiro: tabuleiro modificado
     """
+    if len(l) != 1 or l not in ABECEDARIO:
+        return t    
     lin = obtem_lin(c)
     col = obtem_col(c)
-    t[lin - 1][col - 1] = l.upper()                 #### TENTATIVA TestTabuleiroInsereObtemLetra::test_1
+    t[lin - 1][col - 1] = l.upper()
     return t
 
 # Reconhecedor
@@ -795,7 +798,7 @@ def tabuleiro_para_str(tab):
     for k in range(len(tabuleiro)): 
             resultado += tabuleiro[k] + "\n"
     
-    return resultado.rstrip()                   ###### TENTATIVA TAD TABULEIRO
+    return resultado.rstrip()
 
 # Funções de alto-nível
 def obtem_padrao(tab, i, f):
@@ -813,8 +816,10 @@ def obtem_padrao(tab, i, f):
     padrao = ''
     distancia = 0
     direcao = None
+    
     linha_inicial, coluna_inicial = obtem_lin(i), obtem_col(i)
     linha_final, coluna_final = obtem_lin(f), obtem_col(f)
+    
     if linha_inicial == linha_final:
         direcao = 'H' 
         distancia = coluna_final - coluna_inicial
@@ -1038,7 +1043,7 @@ def jogada_humano(tab, jog, vocab, pilha):
         # Recebe um input com as instruções do jogador
         jogada = input("Jogada " + str(jogador_identidade(jog)) + ": ")
 
-        jogada_recebida = jogada.strip().split()                                ### TENTATIVA CORRIGIR ERROS JOGADA HUMANO
+        jogada_recebida = jogada.strip().split()
         
         if len(jogada_recebida) == 0:
             continue
@@ -1264,10 +1269,11 @@ def scrabble2(jogadores, nome_fich, estado):
         tuple: um tuplo com as pontuações finais de cada jogador
 
     Raise:
-        ValueError: 
-
-        
-
+        ValueError: se o número de jogadores não estiver entre 2 e 4
+                    se o estado não for um inteiro positivo
+                    se o nome do ficheiro não for uma string
+                    se o nome do jogador não for uma string ou se estiver vazia
+                    se o nome do agente não for 'FACIL', 'MEDIO' ou 'DIFICIL'
     """
     print("Bem-vindo ao SCRABBLE2.")
     tab=cria_tabuleiro()
