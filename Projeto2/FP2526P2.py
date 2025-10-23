@@ -314,7 +314,7 @@ def eh_jogador(arg):
     if type(arg) != dict:
         return False
     else: 
-        return ('nome' in arg or 'nivel' in arg)           #CUIDADO COM A BARRAREIRA
+        return ('nome' in arg or 'nivel' in arg)
 
 def eh_humano(arg):
     """
@@ -328,7 +328,7 @@ def eh_humano(arg):
     """
     if not eh_jogador(arg):
         return False
-    return 'nome' in arg           #CUIDADO COM A BARRAREIRA
+    return 'nome' in arg
 
 def eh_agente(arg):
     """
@@ -342,7 +342,7 @@ def eh_agente(arg):
     """
     if not eh_jogador(arg):
         return False
-    return 'nivel' in arg           #CUIDADO COM A BARRAREIRA
+    return 'nivel' in arg
 
 # Teste
 def jogadores_iguais(j1, j2):
@@ -839,7 +839,7 @@ def insere_palavra(tab, casa, direcao, palavra):
     modificando destrutivamente o tabuleiro
 
     Args:
-        tab (universal): o TAD tabuleiro
+        tab (tabuleiro): o TAD tabuleiro
         casa (casa): a casa onde a palavra começa
         direcao (str): 'H' para horizontal ou 'V' para vertical
         palavra (str): palavra a inserir
@@ -866,6 +866,8 @@ def insere_palavra(tab, casa, direcao, palavra):
         inc_coluna = 1
     elif direcao == 'V':
         inc_linha = 1
+    else:
+        return tab
     
     for i in range(len(palavra)):
         nova_casa = cria_casa(linha + inc_linha * i, coluna + inc_coluna * i)
@@ -1038,7 +1040,7 @@ def jogada_humano(tab, jog, vocab, pilha):
         jogada = input("Jogada " + str(jogador_identidade(jog)) + ": ")
         if '  'in jogada:
             continue
-        jogada_recebida = jogada.split()
+        jogada_recebida = jogada.strip().split()                                ####TENTATIVA TestScrabble2::test_4
         
         if len(jogada_recebida) == 0:
             continue
@@ -1276,13 +1278,18 @@ def scrabble2(jogadores, nome_fich, estado):
         raise ValueError("scrabble2: argumentos inválidos")
     if type(estado) != int or estado < 0 :
         raise ValueError("scrabble2: argumentos inválidos")
+    if isinstance(nome_fich, str) == False:
+        raise ValueError("scrabble2: argumentos inválidos")                 ### tentativa TestScrabble2Exceptions::test_6
+    
     pilha = baralha_saco(estado)        
     
     lista_de_jogadores = []
     for jogador in jogadores:
-        if not(isinstance(jogador, str)) or jogador  == '' or jogador == '@':
+        if (not(isinstance(jogador, str)) or jogador  == '' ):
             raise ValueError("scrabble2: argumentos inválidos")
         if jogador[0] == '@':
+            if jogador[1:] not in ('FACIL', 'MEDIO', 'DIFICIL'):
+                raise ValueError("scrabble2: argumentos inválidos")         ##### TENTATIVA TestScrabble2Exceptions::test_4
             lista_de_jogadores.append(cria_agente(jogador[1:]))
         else:
             lista_de_jogadores.append(cria_humano(jogador))
@@ -1324,9 +1331,3 @@ def scrabble2(jogadores, nome_fich, estado):
             indice_jogador_atual += 1
 
     return tuple(jogador_pontos(jog) for jog in lista_de_jogadores)
-
-#jogs = ('J1', 'J2', 'J3')
-#scrabble2(jogs, 'vocab25k.txt', 48)
-
-jogs = ('@DIFICIL','@DIFICIL','@DIFICIL')
-scrabble2(jogs, 'vocab25k.txt', 1)
