@@ -1094,46 +1094,6 @@ def processa_troca(jogada_recebida, jog, pilha):
 
     return False
 
-def toca_antes_ou_depois(tab, casa_inicial, casa_final, direcao):
-    """
-    Função auxiliar que verifica se a palavra jogada toca numa letra antes ou depois
-    
-    Args:
-        tab (tabuleiro): o TAD tabuleiro
-        casa_inicial (casa): a casa inicial da palavra
-        casa_final (casa): a casa final da palavra
-        direcao (str): a direção da palavra
-
-    Returns:
-        bool: True se a palavra toca antes ou depois, False se não toca
-    """
-    toca_antes = False
-    toca_depois = False
-    
-    if direcao == 'H' :
-        if obtem_col(casa_inicial) > 1 :
-            casa_antes = cria_casa(obtem_lin(casa_inicial), obtem_col(casa_inicial) - 1)
-            if obtem_letra(tab, casa_antes)!= '':
-                toca_antes = True
-        if obtem_col(casa_final) < TAMANHO_DO_TABULEIRO:
-            casa_depois = cria_casa(obtem_lin(casa_final), obtem_col(casa_final) + 1)
-            if obtem_letra(tab, casa_depois)!= '':
-                toca_depois = True
-    
-    elif direcao == 'V':
-        if obtem_lin(casa_inicial) > 1:
-            casa_antes = cria_casa(obtem_lin(casa_inicial) - 1, obtem_col(casa_inicial))
-            if obtem_letra(tab, casa_antes)!= '':
-                toca_antes = True        
-        if obtem_lin(casa_final) < TAMANHO_DO_TABULEIRO:   
-            casa_depois = cria_casa(obtem_lin(casa_final) + 1, obtem_col(casa_final))
-            if obtem_letra(tab, casa_depois)!= '':
-                toca_depois = True
-    
-    if toca_antes or toca_depois:
-        return True
-    return False 
-
 def jogar(tab, jog, vocab, pilha, jogada_recebida):
     """
     Função auxiliar para tratar de uma jogada de palavra
@@ -1167,9 +1127,6 @@ def jogar(tab, jog, vocab, pilha, jogada_recebida):
         return False
     
     if casas_iguais(casa_final, casa_inicial) and len(palavra) > 1:
-        return False
-    
-    if toca_antes_ou_depois(tab, casa_inicial, casa_final, direcao):
         return False
     
     padrao = obtem_padrao(tab, casa_inicial, casa_final)
