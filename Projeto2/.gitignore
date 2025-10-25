@@ -1,3 +1,5 @@
 __pycache__
 TESTAR.ipynb
 .pytest_cache
+results.txt
+trace_runtimme.py

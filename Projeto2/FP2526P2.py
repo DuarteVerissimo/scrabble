@@ -238,16 +238,13 @@ def jogador_letras(j):
         str: Uma string com as letras do jogador
     """
     lista_letras = []
-    res = ''
+
     for letra, occ in j['letras'].items():
-        lista_letras.extend(letra * occ)
+        lista_letras.extend([letra] * occ)
     
     lista_letras.sort(key=lambda x: ABECEDARIO[x])
     
-    for i in range(len(lista_letras)):
-        res += lista_letras[i]
-    
-    return res
+    return ''.join(lista_letras)
 
 # Modificadores
 def recebe_letra(j, l):
@@ -435,6 +432,7 @@ def cria_vocabulario(v):
     if not isinstance(v, tuple) or v == () or len(v) != len(set(v)):
         raise ValueError("cria_vocabulario: argumento inválido")
     vocabulario_final = {}
+    segundo_vocabulario = {}
     for palavra in v:
         if not isinstance(palavra, str):
             raise ValueError("cria_vocabulario: argumento inválido")
@@ -450,8 +448,9 @@ def cria_vocabulario(v):
         letra_inicial = palavra[0] 
         pontuacao = sum(pontos[letra] for letra in palavra)
         chave = (comprimento, letra_inicial)
-        
-        
+ 
+        segundo_vocabulario[palavra] = pontuacao
+
         if chave not in vocabulario_final:
             vocabulario_final[chave] = []
         vocabulario_final[chave].append((palavra, pontuacao))
@@ -459,7 +458,7 @@ def cria_vocabulario(v):
     for chave in vocabulario_final: 
         vocabulario_final[chave] = sorted(vocabulario_final[chave], key = lambda x:(-x[1], [ABECEDARIO[letra] for letra in x[0]]))
         vocabulario_final[chave] = tuple(vocabulario_final[chave])
-    return vocabulario_final
+    return (vocabulario_final, segundo_vocabulario)
 
 # Seletores
 def obtem_pontos(vocabulario, palavra):
@@ -473,12 +472,8 @@ def obtem_pontos(vocabulario, palavra):
     Returns:
         int: os pontos da palavra, ou 0 se não existir
     """
-    chave = (len(palavra), palavra[0])
-    if chave in vocabulario:
-        # Percorre o tuplo de palavras para encontrar a correspondente
-        for p, pontuacao in vocabulario[chave]:
-            if p == palavra:
-                return pontuacao  # Retorna a pontuação pré-calculada
+    if palavra in vocabulario[1]:
+        return vocabulario[1][palavra]
     return 0  # Retorna 0 se a palavra não for encontrada
 
 def obtem_palavras(vocabulario, comp, letra):
@@ -494,9 +489,9 @@ def obtem_palavras(vocabulario, comp, letra):
         tuple: um tuplo com as palavras encontradas, ou um tuplo vazio se não encontrar nenhuma
     """
     chave = (comp, letra)
-    if chave not in vocabulario:
+    if chave not in vocabulario[0]:
         return ()
-    return vocabulario[chave]
+    return vocabulario[0][chave]
 
 # Teste
 def testa_palavra_padrao(vocabulario, palavra, padrao, conj):
@@ -515,7 +510,7 @@ def testa_palavra_padrao(vocabulario, palavra, padrao, conj):
     """
     if len(palavra) != len(padrao) or obtem_pontos(vocabulario, palavra) == 0:
         return False
-    
+
     letras_disponiveis = {}
     for letra in conj:
         if letra not in letras_disponiveis:
@@ -574,7 +569,7 @@ def vocabulario_para_str(vocabulario):
     for comprimento in range(2, TAMANHO_DO_TABULEIRO + 1):
         for letra in ABECEDARIO:
             chave = (comprimento, letra)
-            if chave in vocabulario:
+            if chave in vocabulario[0]:
                 tuplo_palavras = obtem_palavras(vocabulario, comprimento, letra)
                 for i in range(len(tuplo_palavras)):
                     palavra = tuplo_palavras[i][0]
@@ -617,8 +612,7 @@ def procura_palavra_padrao(vocabulario, padrao, letras, min_pontos):
             for palavra, pontuacao in palavras_validas:
                 if pontuacao < min_pontos:
                     break
-                if testa_palavra_padrao(vocabulario, palavra, padrao, letras):
-                    if pontuacao > melhor_pontuacao:
+                if pontuacao > melhor_pontuacao and testa_palavra_padrao(vocabulario, palavra, padrao, letras):
                         melhor_palavra = palavra
                         melhor_pontuacao = pontuacao
         return (melhor_palavra, melhor_pontuacao)
