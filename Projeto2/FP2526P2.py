@@ -887,7 +887,7 @@ def obtem_subpadroes(tab, i, f, l):
     # Define o início do subpadrão(índice 'j')
     for j in range(len(padrao)):
         # Define o fim do subpadrão (índice `k`)
-        # Decresnte para começar nos padrões menores
+        # Decresnte para começar nos padrões maiores
         for k in range(len(padrao), j, -1):
             sub_padrao = padrao[j:k]
             
